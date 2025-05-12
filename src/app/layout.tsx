@@ -1,8 +1,19 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import dynamic from 'next/dynamic';
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import FluentProviderWrapper from "@/components/FluentProviderWrapper";
+import { ReactNode } from "react";
+
+// Typdefinition für die Props des ClientLayoutWrappers
+interface ClientLayoutWrapperProps {
+  children: ReactNode;
+}
+
+// Dynamischer Import für den Client-Layout-Wrapper mit deaktiviertem SSR
+const ClientLayoutWrapper = dynamic<ClientLayoutWrapperProps>(
+  () => import('@/components/ClientLayoutWrapper'),
+  { ssr: false }
+);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,14 +30,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={inter.className}>
-        <FluentProviderWrapper>
-          <div className="flex h-screen">
-            <Navbar />
-            <div className="flex-1 overflow-auto">
-              {children}
-            </div>
-          </div>
-        </FluentProviderWrapper>
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

@@ -1,83 +1,143 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { 
   Button, 
   Title2, 
-  Card, 
-  Input, 
-  Dropdown, 
-  Option,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbDivider,
-  Text,
-  Label,
-  Field,
+  Card,
+  Input,
   Textarea,
   Checkbox,
   SpinButton,
   Slider,
   Radio,
-  RadioGroup
+  RadioGroup,
+  Label,
+  Field
 } from "@fluentui/react-components";
 import { 
   ArrowLeftRegular,
   ArrowRightRegular,
-  SearchRegular,
-  DocumentSaveRegular,
-  CalendarRegular,
-  SaveRegular
+  SaveRegular,
+  DocumentSaveRegular
 } from "@fluentui/react-icons";
 
-// Temporärer Ersatz für DatePicker
+// Stark vereinfachte Dropdown-Komponente für bessere Kompatibilität
+function SimpleDropdown({ 
+  options, 
+  placeholder, 
+  value, 
+  onChange 
+}: { 
+  options: {value: string, label: string}[], 
+  placeholder: string, 
+  value: string, 
+  onChange: (value: string) => void 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="relative w-full">
+      <div 
+        className="border rounded p-2 cursor-pointer flex justify-between items-center"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{value ? options.find(opt => opt.value === value)?.label : placeholder}</span>
+        <span>{isOpen ? '▲' : '▼'}</span>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute left-0 top-full w-full border rounded mt-1 bg-white z-10 max-h-60 overflow-y-auto">
+          {options.map(option => (
+            <div 
+              key={option.value}
+              className="p-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Vereinfachter DatePicker
 const SimpleDateInput = ({ placeholder }: { placeholder: string }) => (
   <Input type="date" placeholder={placeholder} />
-)
+);
 
 export default function NeuesAngebot() {
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedContact, setSelectedContact] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState("");
+  
+  // Kunden-Optionen
+  const customerOptions = [
+    { value: "rath", label: "R.A.T.H. Logistik GmbH" },
+    { value: "wiener", label: "Wiener Transport AG" },
+    { value: "alpen", label: "Alpen Cargo" },
+    { value: "oebb", label: "ÖBB Rail Cargo" },
+    { value: "swiss", label: "Swiss Rail Solutions" },
+    { value: "db", label: "Deutsche Bahn Cargo" }
+  ];
+  
+  // Ansprechpartner-Optionen
+  const contactOptions = [
+    { value: "wagner", label: "Dr. Hans Wagner" },
+    { value: "schmid", label: "DI Peter Schmid" }
+  ];
+  
+  // Einheiten-Optionen
+  const unitOptions = [
+    { value: "t", label: "Tonnen" },
+    { value: "kg", label: "Kilogramm" },
+    { value: "containers", label: "Container" },
+    { value: "wagons", label: "Waggons" }
+  ];
+  
   return (
     <div className="p-6">
-      <div className="mb-4">
-        <Breadcrumb>
-          <BreadcrumbItem>
-            <Link href="/">Dashboard</Link>
-          </BreadcrumbItem>
-          <BreadcrumbDivider />
-          <BreadcrumbItem>
-            <Link href="/angebote">Angebote</Link>
-          </BreadcrumbItem>
-          <BreadcrumbDivider />
-          <BreadcrumbItem>Neues Angebot</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
+        <div className="text-sm text-gray-500 mb-2">
+          <span>Dashboard</span> &gt; <span>Angebote</span> &gt; <span>Neues Angebot</span>
+        </div>
         <Title2>Neues Angebot erstellen</Title2>
       </div>
 
       <Card className="mb-6">
         <div className="p-4 border-b">
           <div className="flex justify-between items-center">
-            <div className="flex space-x-1">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center">1</div>
+            <div className="flex">
+              <div className="flex flex-col items-center w-24">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center">1</div>
+                <span className="mt-2 text-sm">Grunddaten</span>
+              </div>
               <div className="border-t-2 border-blue-600 w-16 mt-4"></div>
-              <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">2</div>
+              <div className="flex flex-col items-center w-24">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">2</div>
+                <span className="mt-2 text-sm">Route</span>
+              </div>
               <div className="border-t-2 border-gray-200 w-16 mt-4"></div>
-              <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">3</div>
+              <div className="flex flex-col items-center w-24">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">3</div>
+                <span className="mt-2 text-sm">Kalkulation</span>
+              </div>
               <div className="border-t-2 border-gray-200 w-16 mt-4"></div>
-              <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">4</div>
+              <div className="flex flex-col items-center w-24">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center">4</div>
+                <span className="mt-2 text-sm">Abschluss</span>
+              </div>
             </div>
             <div className="flex space-x-4">
               <Button icon={<SaveRegular />}>Zwischenspeichern</Button>
               <Button appearance="primary" icon={<DocumentSaveRegular />}>Angebot erstellen</Button>
             </div>
-          </div>
-          <div className="flex justify-start mt-2">
-            <Text style={{ marginLeft: "0px" }}>Grunddaten</Text>
-            <Text style={{ marginLeft: "100px" }}>Route</Text>
-            <Text style={{ marginLeft: "105px" }}>Kalkulation</Text>
-            <Text style={{ marginLeft: "95px" }}>Abschluss</Text>
           </div>
         </div>
         
@@ -85,52 +145,45 @@ export default function NeuesAngebot() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Field label="Kunde auswählen" required>
-                <div className="flex items-center">
-                  <SearchRegular className="absolute ml-2 text-gray-500" />
-                  <Dropdown className="w-full pl-8" placeholder="Kunden suchen...">
-                    <Option value="rath">R.A.T.H. Logistik GmbH</Option>
-                    <Option value="wiener">Wiener Transport AG</Option>
-                    <Option value="alpen">Alpen Cargo</Option>
-                    <Option value="oebb">ÖBB Rail Cargo</Option>
-                    <Option value="swiss">Swiss Rail Solutions</Option>
-                    <Option value="db">Deutsche Bahn Cargo</Option>
-                  </Dropdown>
-                </div>
+                <SimpleDropdown 
+                  options={customerOptions} 
+                  placeholder="Kunden suchen..." 
+                  value={selectedCustomer} 
+                  onChange={setSelectedCustomer}
+                />
               </Field>
               
-              <Field label="Ansprechpartner">
-                <Dropdown placeholder="Ansprechpartner auswählen">
-                  <Option value="wagner">Dr. Hans Wagner</Option>
-                  <Option value="schmid">DI Peter Schmid</Option>
-                </Dropdown>
+              <Field label="Ansprechpartner" className="mt-4">
+                <SimpleDropdown 
+                  options={contactOptions} 
+                  placeholder="Ansprechpartner auswählen" 
+                  value={selectedContact} 
+                  onChange={setSelectedContact}
+                />
               </Field>
               
-              <Field label="Angebotsnr.">
+              <Field label="Angebotsnr." className="mt-4">
                 <Input readOnly value="ANG-2025-043" disabled />
               </Field>
               
-              <Field label="Gültigkeitsdauer">
+              <Field label="Gültigkeitsdauer" className="mt-4">
                 <div className="flex space-x-4">
-                  <Field label="Von" style={{ width: '50%' }}>
-                    <div className="flex items-center">
-                      <CalendarRegular className="absolute ml-2 text-gray-500" />
-                      <SimpleDateInput placeholder="Datum wählen" />
-                    </div>
-                  </Field>
-                  <Field label="Bis" style={{ width: '50%' }}>
-                    <div className="flex items-center">
-                      <CalendarRegular className="absolute ml-2 text-gray-500" />
-                      <SimpleDateInput placeholder="Datum wählen" />
-                    </div>
-                  </Field>
+                  <div className="w-1/2">
+                    <Label>Von</Label>
+                    <SimpleDateInput placeholder="Datum wählen" />
+                  </div>
+                  <div className="w-1/2">
+                    <Label>Bis</Label>
+                    <SimpleDateInput placeholder="Datum wählen" />
+                  </div>
                 </div>
               </Field>
               
-              <Field label="Projekt/Referenz">
+              <Field label="Projekt/Referenz" className="mt-4">
                 <Input placeholder="z.B. Jahresprojekt 2025" />
               </Field>
               
-              <Field label="Vertragsart">
+              <Field label="Vertragsart" className="mt-4">
                 <RadioGroup>
                   <Radio value="single" label="Einzelangebot" />
                   <Radio value="framework" label="Rahmenvertrag" />
@@ -144,19 +197,23 @@ export default function NeuesAngebot() {
                 <Input placeholder="Beschreibung des Transportgutes" />
               </Field>
               
-              <Field label="Gewicht/Menge" required>
+              <Field label="Gewicht/Menge" required className="mt-4">
                 <div className="flex space-x-4">
-                  <SpinButton defaultValue={0} min={0} max={1000} step={0.5} style={{ width: '50%' }} />
-                  <Dropdown style={{ width: '50%' }}>
-                    <Option value="t">Tonnen</Option>
-                    <Option value="kg">Kilogramm</Option>
-                    <Option value="containers">Container</Option>
-                    <Option value="wagons">Waggons</Option>
-                  </Dropdown>
+                  <div className="w-1/2">
+                    <SpinButton defaultValue={0} min={0} max={1000} step={0.5} />
+                  </div>
+                  <div className="w-1/2">
+                    <SimpleDropdown 
+                      options={unitOptions} 
+                      placeholder="Einheit wählen" 
+                      value={selectedUnit} 
+                      onChange={setSelectedUnit}
+                    />
+                  </div>
                 </div>
               </Field>
               
-              <Field label="Priorität">
+              <Field label="Priorität" className="mt-4">
                 <Slider 
                   min={1} 
                   max={5} 
@@ -165,11 +222,11 @@ export default function NeuesAngebot() {
                 />
               </Field>
               
-              <Field label="Bemerkungen/Hinweise">
+              <Field label="Bemerkungen/Hinweise" className="mt-4">
                 <Textarea placeholder="Interne Bemerkungen zum Angebot" />
               </Field>
               
-              <div className="mt-2">
+              <div className="mt-4">
                 <Field>
                   <Checkbox label="Leerfahrt in Kalkulation berücksichtigen" />
                 </Field>
