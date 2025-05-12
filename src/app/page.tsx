@@ -32,7 +32,7 @@ export default function Dashboard() {
         <div className="flex justify-between items-center">
           <div>
             <Title3>Rolling-Tons Angebotssoftware</Title3>
-            <Text size={300}>Willkommen zurück, Bill Meixner</Text>
+            <Text size={300} className="ml-4">Willkommen zurück, Bill Meixner</Text>
           </div>
           <Link href="/angebote/neu">
             <Button appearance="primary" icon={<DocumentAdd24Regular />}>Neues Angebot</Button>

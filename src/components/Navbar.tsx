@@ -86,7 +86,7 @@ export default function Navbar() {
     <nav className={styles.nav}>
       <div className={styles.navHeader}>
         <Text size={500} weight="semibold">Rolling-Tons</Text>
-        <Text size={300}>Angebotssoftware</Text>
+        <Text size={300} className="ml-2">Angebotssoftware</Text>
       </div>
       
       <ul className={styles.navList}>
@@ -134,7 +134,7 @@ export default function Navbar() {
         </div>
         <div>
           <Text weight="semibold">Bill Meixner</Text>
-          <Text size={200}>Vertriebsmitarbeiter</Text>
+          <Text size={200} className="ml-2">Vertriebsmitarbeiter</Text>
         </div>
       </div>
     </nav>
