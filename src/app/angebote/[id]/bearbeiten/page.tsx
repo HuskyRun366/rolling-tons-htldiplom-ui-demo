@@ -41,7 +41,6 @@ export default function AngebotBearbeiten() {
     ansprechpartner: "",
     route: "",
     transportgut: "",
-    menge: "",
     abfahrt: "",
     ankunft: "",
     gueltigBis: "",
@@ -52,6 +51,10 @@ export default function AngebotBearbeiten() {
   // Extrahiere Start- und Zielbahhnhof aus der Route
   const [startbahnhof, setStartbahnhof] = useState("");
   const [zielbahnhof, setZielbahnhof] = useState("");
+  
+  // State für getrennte Menge und Einheit
+  const [mengeWert, setMengeWert] = useState("");
+  const [mengeEinheit, setMengeEinheit] = useState("Tonnen"); // Standardeinheit
   
   // Finde den aktuell ausgewählten Kunden, um die Ansprechpartner zu bestimmen
   const selectedKundeObject = kunden.find(k => k.name === formData.kunde);
@@ -79,13 +82,15 @@ export default function AngebotBearbeiten() {
         console.log("Geladenes Angebot:", angebot);
         
         if (angebot) {
+          // Debug: Wert von transportgut prüfen
+          console.log("angebot.transportgut vor setFormData:", angebot.transportgut);
+          
           // Formular mit existierenden Daten füllen
           setFormData({
             kunde: angebot.kunde || "",
             ansprechpartner: angebot.ansprechpartner || "",
             route: angebot.route || "",
-            transportgut: angebot.transportgut || "",
-            menge: angebot.menge || "",
+            transportgut: (angebot.transportgut === "Nicht angegeben" || !angebot.transportgut) ? "" : angebot.transportgut,
             abfahrt: angebot.abfahrt || "",
             ankunft: angebot.ankunft || "",
             gueltigBis: angebot.gueltigBis || "",
@@ -101,6 +106,22 @@ export default function AngebotBearbeiten() {
               initialZiel = routeParts[1];
               console.log("Bahnhöfe initialisiert:", initialStart, initialZiel);
             }
+          }
+          
+          // Menge parsen und setzen
+          if (angebot.menge) {
+            const mengeParts = angebot.menge.trim().split(/\s+/);
+            if (mengeParts.length > 0) {
+              setMengeWert(mengeParts[0]);
+              if (mengeParts.length > 1) {
+                setMengeEinheit(mengeParts.slice(1).join(' ')); // Rest als Einheit
+              }
+            }
+             console.log("Menge initialisiert:", mengeParts[0], mengeParts.slice(1).join(' '));
+          } else {
+             console.log("Keine Menge im Angebot gefunden, Standard wird verwendet.");
+             setMengeWert("");
+             setMengeEinheit("Tonnen"); // Standard bei fehlendem Wert
           }
         } else {
           console.error("Angebot mit ID", params.id, "nicht gefunden");
@@ -129,23 +150,29 @@ export default function AngebotBearbeiten() {
   // Dropdown-Änderungen verarbeiten
   const handleDropdownChange = (name: string, value: string) => {
     console.log(`Dropdown geändert: ${name} = ${value}`);
-    setFormData(prev => {
-      const newState = { ...prev, [name]: value };
-      // Wenn Kunde geändert wird, Ansprechpartner zurücksetzen
-      if (name === 'kunde') {
-        newState.ansprechpartner = ''; 
-        console.log("Kunde geändert, Ansprechpartner zurückgesetzt.");
-        
-        // Finde den neuen Kunden und wähle den ersten Ansprechpartner standardmäßig aus (optional)
-        const newSelectedKunde = kunden.find(k => k.name === value);
-        if (newSelectedKunde && newSelectedKunde.ansprechpartner.length > 0) {
-           // newState.ansprechpartner = newSelectedKunde.ansprechpartner[0]; // Optional: Ersten Ansprechpartner auswählen
-           // console.log(`Erster Ansprechpartner für ${value} gesetzt: ${newState.ansprechpartner}`);
-        }
-      }
-      console.log("Neuer formData State (nach Dropdown-Änderung):", newState);
-      return newState;
-    });
+    // Spezieller Handler für Menge Einheit
+    if (name === 'mengeEinheit') {
+       setMengeEinheit(value);
+       console.log("Neuer mengeEinheit State:", value);
+    } else {
+       setFormData(prev => {
+         const newState = { ...prev, [name]: value };
+         // Wenn Kunde geändert wird, Ansprechpartner zurücksetzen
+         if (name === 'kunde') {
+           newState.ansprechpartner = ''; 
+           console.log("Kunde geändert, Ansprechpartner zurückgesetzt.");
+           
+           // Finde den neuen Kunden und wähle den ersten Ansprechpartner standardmäßig aus (optional)
+           const newSelectedKunde = kunden.find(k => k.name === value);
+           if (newSelectedKunde && newSelectedKunde.ansprechpartner.length > 0) {
+              // newState.ansprechpartner = newSelectedKunde.ansprechpartner[0]; // Optional: Ersten Ansprechpartner auswählen
+              // console.log(`Erster Ansprechpartner für ${value} gesetzt: ${newState.ansprechpartner}`);
+           }
+         }
+         console.log("Neuer formData State (nach Dropdown-Änderung):", newState);
+         return newState;
+       });
+    }
   };
   
   // Route aktualisieren, wenn Start- oder Zielbahnhof geändert wird
@@ -162,9 +189,20 @@ export default function AngebotBearbeiten() {
     e.preventDefault();
     setSaving(true);
     
+    // Menge kombinieren
+    const kombinierteMenge = `${mengeWert} ${mengeEinheit}`.trim();
+    console.log("Kombinierte Menge für Speichern:", kombinierteMenge);
+
+    // Zu speichernde Daten vorbereiten
+    const dataToSave = {
+      ...formData,
+      menge: kombinierteMenge // Kombinierte Menge hinzufügen/überschreiben
+    };
+
     // Angebot aktualisieren
     if (params.id) {
-      updateAngebot(params.id as string, formData);
+      console.log("Speichere Daten:", dataToSave);
+      updateAngebot(params.id as string, dataToSave);
       
       // Kurze Verzögerung, dann zur Detailseite navigieren
       setTimeout(() => {
@@ -278,44 +316,53 @@ export default function AngebotBearbeiten() {
                 </select>
               </div>
               
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Transportgut
-                </label>
-                <input 
-                  type="text"
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  name="transportgut" 
-                  value={formData.transportgut || ""} 
-                  onChange={handleInputChange}
-                />
+              <div className="md:col-span-2 flex flex-col md:flex-row md:items-end md:space-x-4 mb-4">
+                <Field label="Transportgut" className="mb-4 md:mb-0 flex-1">
+                  <Input
+                    name="transportgut"
+                    placeholder="Beschreibung des Transportgutes"
+                    value={formData.transportgut || ""}
+                    onChange={(e, data) => handleInputChange({ target: { name: "transportgut", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
+                  />
+                </Field>
+
+                <Field label="Gewicht/Menge" className="mb-4 md:mb-0 w-full md:w-1/5">
+                  <Input
+                    name="mengeWert" 
+                    type="number"
+                    value={mengeWert}
+                    onChange={(e, data) => setMengeWert(data?.value || "")}
+                  />
+                </Field>
+                
+                <div className="w-full md:w-1/5 flex flex-col">
+                  <label htmlFor="mengeEinheit" className="mb-1 text-sm font-medium text-gray-700">Einheit</label>
+                  <select
+                     id="mengeEinheit" 
+                     name="mengeEinheit"
+                     value={mengeEinheit}
+                     onChange={(e) => handleDropdownChange("mengeEinheit", e.target.value)}
+                     className="w-full border rounded px-3 py-1.5 h-9 focus:outline-none focus:border-blue-500 bg-white"
+                  >
+                     <option>Tonnen</option>
+                     <option>kg</option>
+                     <option>Stück</option>
+                     <option>Paletten</option>
+                     <option>Container</option>
+                     <option>m³</option>
+                  </select>
+                </div>
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Menge
-                </label>
-                <input 
-                  type="text"
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  name="menge" 
-                  value={formData.menge || ""} 
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gültig bis
-                </label>
-                <input 
-                  type="text"
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  name="gueltigBis" 
-                  value={formData.gueltigBis || ""} 
-                  onChange={handleInputChange}
-                  placeholder="TT.MM.JJJJ"
-                />
+                <Field label="Gültig bis" className="mb-4">
+                  <Input
+                    name="gueltigBis"
+                    type="date"
+                    value={formData.gueltigBis || ""}
+                    onChange={(e, data) => handleInputChange({ target: { name: "gueltigBis", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
+                  />
+                </Field>
               </div>
               
               <div className="mb-4">
@@ -392,31 +439,25 @@ export default function AngebotBearbeiten() {
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Abfahrt
-                </label>
-                <input 
-                  type="text"
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  name="abfahrt" 
-                  value={formData.abfahrt || ""} 
-                  onChange={handleInputChange}
-                  placeholder="TT.MM.JJJJ, HH:MM"
-                />
+                <Field label="Abfahrt" hint="TT.MM.JJJJ, HH:MM" className="mb-4">
+                  <Input 
+                    name="abfahrt" 
+                    value={formData.abfahrt || ""} 
+                    placeholder="TT.MM.JJJJ, HH:MM"
+                    onChange={(e, data) => handleInputChange({ target: { name: "abfahrt", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
+                  />
+                </Field>
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ankunft
-                </label>
-                <input 
-                  type="text"
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  name="ankunft" 
-                  value={formData.ankunft || ""} 
-                  onChange={handleInputChange}
-                  placeholder="TT.MM.JJJJ, HH:MM"
-                />
+                <Field label="Ankunft" hint="TT.MM.JJJJ, HH:MM" className="mb-4">
+                  <Input 
+                    name="ankunft" 
+                    value={formData.ankunft || ""} 
+                    placeholder="TT.MM.JJJJ, HH:MM"
+                    onChange={(e, data) => handleInputChange({ target: { name: "ankunft", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
+                  />
+                </Field>
               </div>
             </div>
           </div>
@@ -427,20 +468,15 @@ export default function AngebotBearbeiten() {
             <h3 className="text-lg font-semibold">Finanzen</h3>
           </div>
           <div className="p-6">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gesamtsumme <span className="text-red-500">*</span>
-              </label>
-              <input 
-                type="text"
-                className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+            <Field label="Gesamtsumme" required hint="€0,00" className="mb-4">
+              <Input 
                 name="summe" 
-                value={formData.summe} 
-                onChange={handleInputChange}
+                value={formData.summe}
                 placeholder="€0,00"
+                onChange={(e, data) => handleInputChange({ target: { name: "summe", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
                 required
               />
-            </div>
+            </Field>
             
             <div className="text-sm text-gray-500 mt-2">
               Hinweis: Für eine detaillierte Kalkulation verwenden Sie bitte den Kalkulations-Tab auf der Detailseite.
