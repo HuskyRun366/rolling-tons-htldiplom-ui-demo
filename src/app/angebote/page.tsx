@@ -110,7 +110,7 @@ export default function Angebote() {
       case 'angenommen': return 'success';
       case 'abgelehnt': return 'danger';
       case 'storniert': return 'informative';
-      default: return 'neutral';
+      default: return 'subtle';
     }
   };
   
@@ -231,7 +231,7 @@ export default function Angebote() {
                   <TableCell>{angebot.erstelldatum}</TableCell>
                   <TableCell>{angebot.summe}</TableCell>
                   <TableCell>
-                    <Badge color={getStatusBadgeColor(angebot.status)}>
+                    <Badge color={getStatusBadgeColor(angebot.status) as any}>
                       {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
                     </Badge>
                   </TableCell>

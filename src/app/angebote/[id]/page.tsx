@@ -1,0 +1,445 @@
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { 
+  Button, 
+  Title2, 
+  Title3,
+  Card, 
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbDivider,
+  Text,
+  Divider,
+  Badge,
+  Dropdown,
+  Option,
+  TabList,
+  Tab,
+  makeStyles,
+  tokens,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell
+} from "@fluentui/react-components";
+import { 
+  ArrowLeftRegular,
+  DocumentPdf24Regular,
+  DocumentEdit24Regular,
+  MailRegular,
+  DocumentCopy24Regular,
+  HistoryRegular,
+  CopyRegular,
+  ChatRegular,
+  NoteRegular,
+  DocumentRegular,
+  MoneyRegular,
+  CalculatorRegular,
+  LocationRegular
+} from "@fluentui/react-icons";
+import { useAngebote } from "@/contexts/AngebotContext";
+import { useEffect, useState } from "react";
+
+const useStyles = makeStyles({
+  detailCard: {
+    padding: tokens.spacingVerticalM,
+    marginBottom: tokens.spacingVerticalM,
+  },
+  detailHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: tokens.spacingVerticalS,
+  },
+  detailBody: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: tokens.spacingHorizontalM,
+  },
+  detailRow: {
+    display: 'flex',
+    marginBottom: tokens.spacingVerticalXS,
+  },
+  detailLabel: {
+    width: '40%',
+    color: tokens.colorNeutralForeground2,
+  },
+  detailValue: {
+    width: '60%',
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  costBreakdown: {
+    marginTop: tokens.spacingVerticalL,
+  },
+  routeCard: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    padding: tokens.spacingVerticalM,
+    borderRadius: tokens.borderRadiusMedium,
+    marginTop: tokens.spacingVerticalM,
+  },
+  routeArrow: {
+    textAlign: 'center',
+    margin: tokens.spacingVerticalS + ' 0',
+  },
+  statusCards: {
+    display: 'flex',
+    marginBottom: tokens.spacingVerticalL,
+    gap: tokens.spacingHorizontalM,
+  },
+  statusCard: {
+    flex: '1 1 0',
+    display: 'flex',
+    alignItems: 'center',
+    padding: tokens.spacingVerticalM,
+  }
+});
+
+// Funktion zum Formatieren des Datums für die Anzeige "noch X Tage"
+function calculateDaysRemaining(dateString: string) {
+  if (!dateString) return null;
+  
+  const dateParts = dateString.split('.');
+  if (dateParts.length !== 3) return null;
+  
+  const dueDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+  const today = new Date();
+  
+  // Unterschied in Millisekunden
+  const diffTime = dueDate.getTime() - today.getTime();
+  // Unterschied in Tagen
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays > 0 ? diffDays : 0;
+}
+
+export default function AngebotDetails() {
+  const styles = useStyles();
+  const params = useParams();
+  const { getAngebotById } = useAngebote();
+  const [angebot, setAngebot] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    if (params.id) {
+      const gefundenesAngebot = getAngebotById(params.id as string);
+      setAngebot(gefundenesAngebot);
+      setLoading(false);
+    }
+  }, [params.id, getAngebotById]);
+  
+  // Status-Badge-Farbe bestimmen
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'offen': return 'warning';
+      case 'angenommen': return 'success';
+      case 'abgelehnt': return 'danger';
+      case 'storniert': return 'informative';
+      default: return 'subtle';
+    }
+  };
+  
+  if (loading) {
+    return <div className="p-6">Angebot wird geladen...</div>;
+  }
+  
+  if (!angebot) {
+    return (
+      <div className="p-6">
+        <div className="mb-4">
+          <Breadcrumb>
+            <BreadcrumbItem>
+              <Link href="/">Dashboard</Link>
+            </BreadcrumbItem>
+            <BreadcrumbDivider />
+            <BreadcrumbItem>
+              <Link href="/angebote">Angebote</Link>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        </div>
+        <Title2>Angebot nicht gefunden</Title2>
+        <div className="mt-4">
+          <Button icon={<ArrowLeftRegular />}>
+            <Link href="/angebote">Zurück zur Angebotsliste</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  const daysRemaining = angebot.gueltigBis ? calculateDaysRemaining(angebot.gueltigBis) : null;
+  
+  return (
+    <div className="p-6">
+      <div className="mb-4">
+        <Breadcrumb>
+          <BreadcrumbItem>
+            <Link href="/">Dashboard</Link>
+          </BreadcrumbItem>
+          <BreadcrumbDivider />
+          <BreadcrumbItem>
+            <Link href="/angebote">Angebote</Link>
+          </BreadcrumbItem>
+          <BreadcrumbDivider />
+          <BreadcrumbItem>{angebot.nummer}</BreadcrumbItem>
+        </Breadcrumb>
+      </div>
+
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <Title2>Angebot {angebot.nummer}</Title2>
+          <Text>Erstellt am {angebot.erstelldatum} durch Bill Meixner</Text>
+        </div>
+        <div className="flex space-x-3">
+          <Button icon={<ArrowLeftRegular />}>
+            <Link href="/angebote">Zurück</Link>
+          </Button>
+          <Button icon={<DocumentPdf24Regular />}>PDF</Button>
+          <Link href={`/angebote/${angebot.id}/bearbeiten`}>
+            <Button icon={<DocumentEdit24Regular />}>Bearbeiten</Button>
+          </Link>
+          <Button icon={<MailRegular />}>E-Mail</Button>
+          <Button icon={<DocumentCopy24Regular />}>Duplizieren</Button>
+        </div>
+      </div>
+
+      <div className={styles.statusCards}>
+        <Card className={styles.statusCard}>
+          <Badge color={getStatusBadgeColor(angebot.status) as any} size="large" className="mr-2">
+            {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
+          </Badge>
+          <div>
+            <Text weight="semibold">Status</Text>
+            <Dropdown>
+              <Option value="offen">Offen</Option>
+              <Option value="angenommen">Angenommen</Option>
+              <Option value="abgelehnt">Abgelehnt</Option>
+              <Option value="storniert">Storniert</Option>
+            </Dropdown>
+          </div>
+        </Card>
+        
+        <Card className={styles.statusCard}>
+          <HistoryRegular className="mr-2 text-blue-600" />
+          <div>
+            <Text weight="semibold">Gültig bis</Text>
+            <Text>
+              {angebot.gueltigBis || 'Keine Angabe'}
+              {daysRemaining !== null && ` (noch ${daysRemaining} Tage)`}
+            </Text>
+          </div>
+        </Card>
+        
+        <Card className={styles.statusCard}>
+          <MoneyRegular className="mr-2 text-green-600" />
+          <div>
+            <Text weight="semibold">Gesamtsumme</Text>
+            <Text size={500}>{angebot.summe}</Text>
+          </div>
+        </Card>
+        
+        <Card className={styles.statusCard}>
+          <CopyRegular className="mr-2 text-purple-600" />
+          <div>
+            <Text weight="semibold">Version</Text>
+            <Text>1.0 (Original)</Text>
+          </div>
+        </Card>
+      </div>
+      
+      <Card>
+        <div className="p-4">
+          <TabList defaultSelectedValue="details">
+            <Tab value="details">Details</Tab>
+            <Tab value="calculation">Kalkulation</Tab>
+            <Tab value="history">Versionshistorie</Tab>
+            <Tab value="documents">Dokumente</Tab>
+            <Tab value="notes">Notizen</Tab>
+          </TabList>
+        </div>
+        
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className={styles.detailCard}>
+              <div className={styles.detailHeader}>
+                <Title3>Kundeninformationen</Title3>
+                <ChatRegular />
+              </div>
+              <Divider />
+              <div className="mt-4">
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Kunde:</Text>
+                  <Text className={styles.detailValue}>{angebot.kunde}</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Ansprechpartner:</Text>
+                  <Text className={styles.detailValue}>{angebot.ansprechpartner}</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Kontakt:</Text>
+                  <Text className={styles.detailValue}>
+                    {angebot.kontakt || 'h.wagner@rath-logistik.de'}
+                  </Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Telefon:</Text>
+                  <Text className={styles.detailValue}>
+                    {angebot.telefon || '+43 1 234567-89'}
+                  </Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Kundenreferenz:</Text>
+                  <Text className={styles.detailValue}>
+                    {angebot.kundenreferenz || 'LOG-2025-118'}
+                  </Text>
+                </div>
+              </div>
+            </Card>
+
+            <Card className={styles.detailCard}>
+              <div className={styles.detailHeader}>
+                <Title3>Angebotsdetails</Title3>
+                <DocumentRegular />
+              </div>
+              <Divider />
+              <div className="mt-4">
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Angebotsnr.:</Text>
+                  <Text className={styles.detailValue}>{angebot.nummer}</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Erstelldatum:</Text>
+                  <Text className={styles.detailValue}>{angebot.erstelldatum}</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Gültig bis:</Text>
+                  <Text className={styles.detailValue}>{angebot.gueltigBis || 'Keine Angabe'}</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Erstellt von:</Text>
+                  <Text className={styles.detailValue}>Bill Meixner</Text>
+                </div>
+                <div className={styles.detailRow}>
+                  <Text className={styles.detailLabel}>Vertragsart:</Text>
+                  <Text className={styles.detailValue}>Einzelangebot</Text>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          <Card className={styles.detailCard}>
+            <div className={styles.detailHeader}>
+              <Title3>Transportdetails</Title3>
+              <LocationRegular />
+            </div>
+            <Divider />
+            
+            <div className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>Transportgut:</Text>
+                    <Text className={styles.detailValue}>{angebot.transportgut || 'Stahlbehälter (Industriegüter)'}</Text>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>Menge:</Text>
+                    <Text className={styles.detailValue}>{angebot.menge || '24 Tonnen'}</Text>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>Transportperiode:</Text>
+                    <Text className={styles.detailValue}>
+                      {angebot.abfahrt && angebot.ankunft 
+                        ? `${angebot.abfahrt.split(',')[0]} - ${angebot.ankunft.split(',')[0]}`
+                        : '15.05.2025 - 20.05.2025'
+                      }
+                    </Text>
+                  </div>
+                </div>
+                <div>
+                  <div className={styles.routeCard}>
+                    <Text weight="semibold" align="center">{angebot.route || 'Wien - Hamburg'}</Text>
+                    <div className={styles.routeArrow}>↓</div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Text weight="semibold">Abfahrt:</Text>
+                        <Text>{angebot.abfahrt || '15.05.2025, 08:30'}</Text>
+                      </div>
+                      <div>
+                        <Text weight="semibold">Ankunft:</Text>
+                        <Text>{angebot.ankunft || '16.05.2025, 14:30'}</Text>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className={styles.detailCard}>
+            <div className={styles.detailHeader}>
+              <Title3>Finanzübersicht</Title3>
+              <CalculatorRegular />
+            </div>
+            <Divider />
+            
+            <div className="mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Position</TableHeaderCell>
+                    <TableHeaderCell>Beschreibung</TableHeaderCell>
+                    <TableHeaderCell>Menge</TableHeaderCell>
+                    <TableHeaderCell>Preis</TableHeaderCell>
+                    <TableHeaderCell>Summe</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>1</TableCell>
+                    <TableCell>Transport {angebot.transportgut || 'Stahlbehälter'} {angebot.route || 'Wien - Hamburg'}</TableCell>
+                    <TableCell>1</TableCell>
+                    <TableCell>€ 9.800,00</TableCell>
+                    <TableCell>€ 9.800,00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>2</TableCell>
+                    <TableCell>Versicherung für Spezialgüter</TableCell>
+                    <TableCell>1</TableCell>
+                    <TableCell>€ 850,00</TableCell>
+                    <TableCell>€ 850,00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>3</TableCell>
+                    <TableCell>Be- und Entladekosten</TableCell>
+                    <TableCell>2</TableCell>
+                    <TableCell>€ 400,00</TableCell>
+                    <TableCell>€ 800,00</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              
+              <div className={styles.costBreakdown}>
+                <div className="flex justify-between py-2">
+                  <Text weight="semibold">Nettosumme:</Text>
+                  <Text>€ 11.450,00</Text>
+                </div>
+                <div className="flex justify-between py-2">
+                  <Text weight="semibold">MwSt. (8,5%):</Text>
+                  <Text>€ 973,25</Text>
+                </div>
+                <Divider className="my-2" />
+                <div className="flex justify-between py-2">
+                  <Text weight="semibold" size={400}>Gesamtsumme:</Text>
+                  <Text weight="semibold" size={400}>{angebot.summe || '€ 12.423,25'}</Text>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </Card>
+    </div>
+  );
+} 
