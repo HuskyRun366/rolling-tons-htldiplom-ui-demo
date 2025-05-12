@@ -180,12 +180,16 @@ export default function NeuesAngebot() {
               <Field label="Gültigkeitsdauer" className="mt-4">
                 <div className="flex space-x-4">
                   <div className="w-1/2 pr-4">
-                    <Label>Von</Label>
-                    <SimpleDateInput placeholder="Datum wählen" />
+                    <Label className="mb-2">Von</Label>
+                    <div className="mt-1">
+                      <SimpleDateInput placeholder="Datum wählen" />
+                    </div>
                   </div>
                   <div className="w-1/2">
-                    <Label>Bis</Label>
-                    <SimpleDateInput placeholder="Datum wählen" />
+                    <Label className="mb-2">Bis</Label>
+                    <div className="mt-1">
+                      <SimpleDateInput placeholder="Datum wählen" />
+                    </div>
                   </div>
                 </div>
               </Field>
