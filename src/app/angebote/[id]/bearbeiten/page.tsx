@@ -439,22 +439,22 @@ export default function AngebotBearbeiten() {
               </div>
               
               <div className="mb-4">
-                <Field label="Abfahrt" hint="TT.MM.JJJJ, HH:MM" className="mb-4">
+                <Field label="Abfahrt" className="mb-4">
                   <Input 
                     name="abfahrt" 
+                    type="datetime-local"
                     value={formData.abfahrt || ""} 
-                    placeholder="TT.MM.JJJJ, HH:MM"
                     onChange={(e, data) => handleInputChange({ target: { name: "abfahrt", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
                   />
                 </Field>
               </div>
               
               <div className="mb-4">
-                <Field label="Ankunft" hint="TT.MM.JJJJ, HH:MM" className="mb-4">
+                <Field label="Ankunft" className="mb-4">
                   <Input 
                     name="ankunft" 
+                    type="datetime-local"
                     value={formData.ankunft || ""} 
-                    placeholder="TT.MM.JJJJ, HH:MM"
                     onChange={(e, data) => handleInputChange({ target: { name: "ankunft", value: data?.value || "" } } as React.ChangeEvent<HTMLInputElement>)}
                   />
                 </Field>
