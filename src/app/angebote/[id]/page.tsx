@@ -191,7 +191,7 @@ export default function AngebotDetails() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <Title2>Angebot {angebot.nummer}</Title2>
-          <Text>Erstellt am {angebot.erstelldatum} durch Bill Meixner</Text>
+          <Text className="ml-1">Erstellt am {angebot.erstelldatum} durch Bill Meixner</Text>
         </div>
         <div className="flex space-x-3">
           <Button icon={<ArrowLeftRegular />}>
@@ -223,26 +223,26 @@ export default function AngebotDetails() {
         </Card>
         
         <Card className={styles.statusCard}>
-          <HistoryRegular className="mr-2 text-blue-600" />
-          <div>
-            <Text weight="semibold">Gültig bis</Text>
+          <HistoryRegular className="mr-2 text-blue-600 text-2xl" />
+          <div className="flex items-baseline">
+            <Text weight="semibold" className="mr-2">Gültig bis</Text>
             <Text>
-              {angebot.gueltigBis || 'Keine Angabe'}
+              {angebot.gueltigBis || 'Nicht festgelegt'}
               {daysRemaining !== null && ` (noch ${daysRemaining} Tage)`}
             </Text>
           </div>
         </Card>
         
         <Card className={styles.statusCard}>
-          <MoneyRegular className="mr-2 text-green-600" />
-          <div>
-            <Text weight="semibold">Gesamtsumme</Text>
+          <MoneyRegular className="mr-2 text-green-600 text-2xl" />
+          <div className="flex items-baseline">
+            <Text weight="semibold" className="mr-2">Gesamtsumme</Text>
             <Text size={500}>{angebot.summe}</Text>
           </div>
         </Card>
         
         <Card className={styles.statusCard}>
-          <CopyRegular className="mr-2 text-purple-600" />
+          <CopyRegular className="mr-2 text-purple-600 text-2xl" />
           <div>
             <Text weight="semibold">Version</Text>
             <Text>1.0 (Original)</Text>

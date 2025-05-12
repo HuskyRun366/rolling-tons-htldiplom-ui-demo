@@ -78,7 +78,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
   },
   userIcon: {
-    marginRight: '0.75rem',
+    marginRight: '1rem',
     backgroundColor: '#0078d4',
     color: 'white',
     width: '32px',
