@@ -2,7 +2,11 @@
 
 import { ReactNode } from "react";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
+import { AngebotProvider } from "@/contexts/AngebotContext";
+import { KundenProvider } from "@/contexts/KundenContext";
+import { WizardProvider } from "@/contexts/WizardContext";
 import Navbar from "./Navbar";
+import Header from "./Header";
 
 interface ClientLayoutWrapperProps {
   children: ReactNode;
@@ -11,19 +15,21 @@ interface ClientLayoutWrapperProps {
 export default function ClientLayoutWrapper({ children }: ClientLayoutWrapperProps) {
   return (
     <FluentProvider theme={webLightTheme}>
-      <div className="flex min-h-screen">
-        <Navbar />
-        <div className="flex-1 flex flex-col overflow-auto">
-          <main className="flex-grow">{children}</main>
-          <footer className="bg-gray-100 py-4">
-            <div className="container mx-auto px-4">
-              <p className="text-center text-gray-600 text-sm">
-                &copy; {new Date().getFullYear()} Rolling-Tons GmbH - HTL Diplomarbeit
-              </p>
+      <AngebotProvider>
+        <KundenProvider>
+          <WizardProvider>
+            <div className="flex h-screen bg-gray-100">
+              <Navbar />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
+                  {children}
+                </main>
+              </div>
             </div>
-          </footer>
-        </div>
-      </div>
+          </WizardProvider>
+        </KundenProvider>
+      </AngebotProvider>
     </FluentProvider>
   );
 } 
