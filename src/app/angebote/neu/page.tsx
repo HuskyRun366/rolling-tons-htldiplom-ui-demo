@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Button, 
   Title2, 
@@ -73,6 +74,7 @@ const SimpleDateInput = ({ placeholder }: { placeholder: string }) => (
 );
 
 export default function NeuesAngebot() {
+  const router = useRouter();
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -100,6 +102,15 @@ export default function NeuesAngebot() {
     { value: "containers", label: "Container" },
     { value: "wagons", label: "Waggons" }
   ];
+  
+  // Weiterleitung zum nächsten Schritt
+  const goToNextStep = () => {
+    // Hier könnten Validierungen stattfinden
+    
+    // Weiterleitung zur Route-Seite (die wir noch erstellen werden)
+    // In einer richtigen Anwendung würden wir die Daten über einen Context oder Redux speichern
+    router.push("/angebote/neu/route");
+  };
   
   return (
     <div className="p-6">
@@ -168,7 +179,7 @@ export default function NeuesAngebot() {
               
               <Field label="Gültigkeitsdauer" className="mt-4">
                 <div className="flex space-x-4">
-                  <div className="w-1/2">
+                  <div className="w-1/2 pr-4">
                     <Label>Von</Label>
                     <SimpleDateInput placeholder="Datum wählen" />
                   </div>
@@ -245,7 +256,7 @@ export default function NeuesAngebot() {
               <Button icon={<ArrowLeftRegular />}>Zurück zur Übersicht</Button>
             </Link>
             <div className="flex items-center">
-              <Button appearance="primary">
+              <Button appearance="primary" onClick={goToNextStep}>
                 Weiter zur Route
                 <ArrowRightRegular className="ml-2" />
               </Button>
