@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Button,
@@ -26,6 +26,8 @@ import {
   AddRegular,
   DeleteRegular
 } from "@fluentui/react-icons";
+import { useWizard } from "@/contexts/WizardContext";
+import Link from "next/link";
 
 // Kostenkomponente Typ
 interface CostComponent {
@@ -37,21 +39,34 @@ interface CostComponent {
 
 export default function KalkulationAngebot() {
   const router = useRouter();
+  const { wizard, updateKalkulation } = useWizard();
   
   // Zustand für Kostenkomponenten
-  const [costComponents, setCostComponents] = useState<CostComponent[]>([
-    { id: '1', name: 'Bahnnutzung', price: 1200, quantity: 1 },
-    { id: '2', name: 'Zugpersonal', price: 800, quantity: 1 },
-    { id: '3', name: 'Energiekosten', price: 650, quantity: 1 }
-  ]);
+  const [costComponents, setCostComponents] = useState<CostComponent[]>(() => {
+    // Bestehende Komponenten aus dem Context laden oder Standardwerte verwenden
+    if (wizard.kalkulation.kostenkomponenten.length > 0) {
+      return wizard.kalkulation.kostenkomponenten.map((k, index) => ({
+        id: String(index + 1),
+        name: k.bezeichnung,
+        price: k.preis,
+        quantity: k.menge
+      }));
+    }
+    
+    return [
+      { id: '1', name: 'Bahnnutzung', price: 1200, quantity: 1 },
+      { id: '2', name: 'Zugpersonal', price: 800, quantity: 1 },
+      { id: '3', name: 'Energiekosten', price: 650, quantity: 1 }
+    ];
+  });
   
   // Rabatt und Zuschläge
-  const [discount, setDiscount] = useState(0);
-  const [expressSurcharge, setExpressSurcharge] = useState(0);
-  const [handlingFee, setHandlingFee] = useState(200);
+  const [discount, setDiscount] = useState(wizard.kalkulation.rabatt);
+  const [expressSurcharge, setExpressSurcharge] = useState(wizard.kalkulation.expresszuschlag);
+  const [handlingFee, setHandlingFee] = useState(wizard.kalkulation.bearbeitungsgebuehr || 200);
   
   // Margen
-  const [margin, setMargin] = useState(15);
+  const [margin, setMargin] = useState(wizard.kalkulation.marge);
   
   // Neue Kostenkomponente hinzufügen
   const addCostComponent = () => {
@@ -72,31 +87,70 @@ export default function KalkulationAngebot() {
   };
   
   // Berechnung der Gesamtkosten
-  const calculateTotalCosts = () => {
+  const calculateTotalCosts = useCallback(() => {
     return costComponents.reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
-  };
+  }, [costComponents]);
   
   // Berechnung des Nettopreises (Kosten - Rabatt + Zuschläge + Bearbeitungsgebühr)
-  const calculateNetPrice = () => {
+  const calculateNetPrice = useCallback(() => {
     const totalCosts = calculateTotalCosts();
     const discountAmount = totalCosts * (discount / 100);
     const surchargeAmount = totalCosts * (expressSurcharge / 100);
     return totalCosts - discountAmount + surchargeAmount + handlingFee;
-  };
+  }, [calculateTotalCosts, discount, expressSurcharge, handlingFee]);
   
   // Berechnung des Bruttopreises mit Marge
-  const calculateGrossPrice = () => {
+  const calculateGrossPrice = useCallback(() => {
     const netPrice = calculateNetPrice();
     return netPrice * (1 + margin / 100);
-  };
+  }, [calculateNetPrice, margin]);
+  
+  // Kontext aktualisieren in einer separaten Funktion für bessere Performance und Callback-Handling
+  const updateContext = useCallback(() => {
+    const totalCosts = calculateTotalCosts();
+    const netPrice = calculateNetPrice();
+    const grossPrice = calculateGrossPrice();
+    
+    // Kostenkomponenten ins richtige Format für den Context umwandeln
+    const formattedComponents = costComponents.map(comp => ({
+      bezeichnung: comp.name,
+      preis: comp.price,
+      menge: comp.quantity,
+      gesamt: comp.price * comp.quantity
+    }));
+    
+    updateKalkulation({
+      kostenkomponenten: formattedComponents,
+      rabatt: discount,
+      marge: margin,
+      expresszuschlag: expressSurcharge,
+      bearbeitungsgebuehr: handlingFee,
+      gesamtkosten: totalCosts,
+      nettopreis: netPrice,
+      bruttosumme: grossPrice
+    });
+  }, [costComponents, discount, expressSurcharge, handlingFee, margin, updateKalkulation, calculateTotalCosts, calculateNetPrice, calculateGrossPrice]);
+  
+  // Speichere Änderungen im Context
+  /*
+  useEffect(() => {
+    updateContext();
+  }, [updateContext]);
+ */
   
   // Navigation zum vorherigen Schritt
   const goToPreviousStep = () => {
+    // Sicherstellen, dass der Kontext gespeichert ist
+    updateContext();
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu/route");
   };
   
   // Navigation zum nächsten Schritt
   const goToNextStep = () => {
+    // Sicherstellen, dass der Kontext gespeichert ist
+    updateContext();
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu/abschluss");
   };
   
@@ -248,15 +302,17 @@ export default function KalkulationAngebot() {
               </Field>
               
               <div className="p-4 border rounded-md bg-gray-50 mt-6">
-                <div className="flex justify-between py-2 border-b">
+                <div className="flex justify-between mb-2">
                   <span className="font-medium">Gesamtkosten:</span>
                   <span>{calculateTotalCosts().toFixed(2)} €</span>
                 </div>
-                <div className="flex justify-between py-2 border-b">
+                
+                <div className="flex justify-between mb-2">
                   <span className="font-medium">Nettopreis:</span>
                   <span>{calculateNetPrice().toFixed(2)} €</span>
                 </div>
-                <div className="flex justify-between py-2 text-lg text-blue-700 font-bold">
+                
+                <div className="flex justify-between pt-2 border-t font-bold text-blue-700 text-lg">
                   <span>Angebotssumme (Brutto):</span>
                   <span>{calculateGrossPrice().toFixed(2)} €</span>
                 </div>

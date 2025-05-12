@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Button, 
@@ -23,6 +23,7 @@ import {
   SaveRegular,
   DocumentSaveRegular
 } from "@fluentui/react-icons";
+import { useWizard } from "@/contexts/WizardContext";
 
 // Stark vereinfachte Dropdown-Komponente für bessere Kompatibilität
 function SimpleDropdown({ 
@@ -69,15 +70,41 @@ function SimpleDropdown({
 }
 
 // Vereinfachter DatePicker
-const SimpleDateInput = ({ placeholder }: { placeholder: string }) => (
-  <Input type="date" placeholder={placeholder} />
+const SimpleDateInput = ({ 
+  placeholder, 
+  value, 
+  onChange 
+}: { 
+  placeholder: string, 
+  value: string, 
+  onChange: (value: string) => void 
+}) => (
+  <Input 
+    type="date" 
+    placeholder={placeholder} 
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+  />
 );
 
 export default function NeuesAngebot() {
   const router = useRouter();
-  const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [selectedContact, setSelectedContact] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState("");
+  const { wizard, updateGrunddaten } = useWizard();
+  
+  // Lokaler Zustand für Formularelemente
+  const [selectedCustomer, setSelectedCustomer] = useState(wizard.grunddaten.kunde);
+  const [selectedContact, setSelectedContact] = useState(wizard.grunddaten.ansprechpartner);
+  const [transportgut, setTransportgut] = useState(wizard.grunddaten.transportgut);
+  const [menge, setMenge] = useState(wizard.grunddaten.menge);
+  const [selectedUnit, setSelectedUnit] = useState(wizard.grunddaten.einheit);
+  const [gueltigBis, setGueltigBis] = useState(wizard.grunddaten.gueltigBis);
+  const [projekt, setProjekt] = useState(wizard.grunddaten.projekt);
+  const [vertragsart, setVertragsart] = useState(wizard.grunddaten.vertragsart);
+  const [prioritaet, setPrioritaet] = useState(wizard.grunddaten.prioritaet);
+  const [bemerkungen, setBemerkungen] = useState(wizard.grunddaten.bemerkungen);
+  const [leerfahrt, setLeerfahrt] = useState(wizard.grunddaten.leerfahrt);
+  const [rueckfahrt, setRueckfahrt] = useState(wizard.grunddaten.rueckfahrt);
+  const [express, setExpress] = useState(wizard.grunddaten.express);
   
   // Kunden-Optionen
   const customerOptions = [
@@ -103,12 +130,41 @@ export default function NeuesAngebot() {
     { value: "wagons", label: "Waggons" }
   ];
   
+  // Kontext aktualisieren
+  const updateContext = useCallback(() => {
+    updateGrunddaten({
+      kunde: selectedCustomer ? customerOptions.find(opt => opt.value === selectedCustomer)?.label || "" : "",
+      ansprechpartner: selectedContact ? contactOptions.find(opt => opt.value === selectedContact)?.label || "" : "",
+      transportgut,
+      menge,
+      einheit: selectedUnit,
+      gueltigBis,
+      projekt,
+      vertragsart,
+      prioritaet,
+      bemerkungen,
+      leerfahrt,
+      rueckfahrt,
+      express
+    });
+  }, [
+    selectedCustomer, selectedContact, transportgut, menge, selectedUnit,
+    gueltigBis, projekt, vertragsart, prioritaet, bemerkungen,
+    leerfahrt, rueckfahrt, express, updateGrunddaten, customerOptions, contactOptions
+  ]);
+  
+  // Speichere Änderungen im Context, wenn sich Formularfelder ändern
+  /*
+  useEffect(() => {
+    updateContext();
+  }, [updateContext]);
+  */
+  
   // Weiterleitung zum nächsten Schritt
   const goToNextStep = () => {
-    // Hier könnten Validierungen stattfinden
-    
-    // Weiterleitung zur Route-Seite (die wir noch erstellen werden)
-    // In einer richtigen Anwendung würden wir die Daten über einen Context oder Redux speichern
+    // Kontext explizit aktualisieren, um sicherzustellen, dass die neuesten Daten gespeichert sind
+    updateContext();
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu/route");
   };
   
@@ -174,7 +230,7 @@ export default function NeuesAngebot() {
               </Field>
               
               <Field label="Angebotsnr." className="mt-4">
-                <Input readOnly value="ANG-2025-043" disabled />
+                <Input readOnly value={wizard.angebotsnummer} disabled />
               </Field>
               
               <Field label="Gültigkeitsdauer" className="mt-4">
@@ -182,24 +238,35 @@ export default function NeuesAngebot() {
                   <div className="w-1/2 pr-4">
                     <Label className="mb-2">Von</Label>
                     <div className="mt-1">
-                      <SimpleDateInput placeholder="Datum wählen" />
+                      <Input type="date" disabled value={new Date().toISOString().split('T')[0]} />
                     </div>
                   </div>
                   <div className="w-1/2">
                     <Label className="mb-2">Bis</Label>
                     <div className="mt-1">
-                      <SimpleDateInput placeholder="Datum wählen" />
+                      <SimpleDateInput 
+                        placeholder="Datum wählen" 
+                        value={gueltigBis} 
+                        onChange={setGueltigBis}
+                      />
                     </div>
                   </div>
                 </div>
               </Field>
               
               <Field label="Projekt/Referenz" className="mt-4">
-                <Input placeholder="z.B. Jahresprojekt 2025" />
+                <Input 
+                  placeholder="z.B. Jahresprojekt 2025" 
+                  value={projekt}
+                  onChange={(e) => setProjekt(e.target.value)}
+                />
               </Field>
               
               <Field label="Vertragsart" className="mt-4">
-                <RadioGroup>
+                <RadioGroup 
+                  value={vertragsart}
+                  onChange={(e, data) => setVertragsart(data.value as string)}
+                >
                   <Radio value="single" label="Einzelangebot" />
                   <Radio value="framework" label="Rahmenvertrag" />
                   <Radio value="expansion" label="Ergänzung zu bestehendem Vertrag" />
@@ -209,13 +276,23 @@ export default function NeuesAngebot() {
             
             <div>
               <Field label="Transportgut" required>
-                <Input placeholder="Beschreibung des Transportgutes" />
+                <Input 
+                  placeholder="Beschreibung des Transportgutes" 
+                  value={transportgut}
+                  onChange={(e) => setTransportgut(e.target.value)}
+                />
               </Field>
               
               <Field label="Gewicht/Menge" required className="mt-4">
                 <div className="flex space-x-4">
                   <div className="w-1/2">
-                    <SpinButton defaultValue={0} min={0} max={1000} step={0.5} />
+                    <Input
+                      type="number"
+                      value={menge}
+                      onChange={(e) => setMenge(e.target.value)}
+                      min={0}
+                      step={0.5}
+                    />
                   </div>
                   <div className="w-1/2">
                     <SimpleDropdown 
@@ -233,38 +310,53 @@ export default function NeuesAngebot() {
                   min={1} 
                   max={5} 
                   step={1} 
-                  defaultValue={3}
+                  value={prioritaet}
+                  onChange={(e, data) => setPrioritaet(data.value as number)}
                 />
               </Field>
               
               <Field label="Bemerkungen/Hinweise" className="mt-4">
-                <Textarea placeholder="Interne Bemerkungen zum Angebot" />
+                <Textarea 
+                  placeholder="Interne Bemerkungen zum Angebot" 
+                  value={bemerkungen}
+                  onChange={(e) => setBemerkungen(e.target.value)}
+                />
               </Field>
               
               <div className="mt-4">
                 <Field>
-                  <Checkbox label="Leerfahrt in Kalkulation berücksichtigen" />
+                  <Checkbox 
+                    label="Leerfahrt in Kalkulation berücksichtigen" 
+                    checked={leerfahrt}
+                    onChange={(e, data) => setLeerfahrt(!!data.checked)}
+                  />
                 </Field>
                 <Field>
-                  <Checkbox label="Rückfahrt anbieten" />
+                  <Checkbox 
+                    label="Rückfahrt anbieten" 
+                    checked={rueckfahrt}
+                    onChange={(e, data) => setRueckfahrt(!!data.checked)}
+                  />
                 </Field>
                 <Field>
-                  <Checkbox label="Expresszuschlag" />
+                  <Checkbox 
+                    label="Expresszuschlag" 
+                    checked={express}
+                    onChange={(e, data) => setExpress(!!data.checked)}
+                  />
                 </Field>
               </div>
             </div>
           </div>
           
           <div className="mt-8 flex justify-between">
-            <Link href="/angebote">
+            <Link href="/angebote" passHref>
               <Button icon={<ArrowLeftRegular />}>Zurück zur Übersicht</Button>
             </Link>
-            <div className="flex items-center">
-              <Button appearance="primary" onClick={goToNextStep}>
-                Weiter zur Route
-                <ArrowRightRegular className="ml-2" />
-              </Button>
-            </div>
+            <Button appearance="primary" onClick={goToNextStep}>
+              Weiter zur Route
+              <ArrowRightRegular className="ml-2" />
+            </Button>
           </div>
         </div>
       </Card>

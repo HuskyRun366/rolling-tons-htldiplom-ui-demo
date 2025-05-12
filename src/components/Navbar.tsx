@@ -18,21 +18,32 @@ import {
 
 const useStyles = makeStyles({
   nav: {
-    width: '240px',
+    width: '260px',
     backgroundColor: '#f0f0f0',
-    height: '100%',
+    minHeight: '100vh',
     padding: '1rem 0',
     borderRight: '1px solid #e0e0e0',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'sticky', 
+    top: 0,
   },
   navHeader: {
     padding: '0 1rem 1.5rem 1rem',
     borderBottom: '1px solid #e0e0e0',
     marginBottom: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  navBrand: {
+    display: 'flex',
+    alignItems: 'baseline',
   },
   navList: {
     listStyle: 'none',
     padding: 0,
     margin: 0,
+    flex: 1,
   },
   navItem: {
     display: 'flex',
@@ -85,8 +96,10 @@ export default function Navbar() {
   return (
     <nav className={styles.nav}>
       <div className={styles.navHeader}>
-        <Text size={500} weight="semibold">Rolling-Tons</Text>
-        <Text size={300} className="ml-2">Angebotssoftware</Text>
+        <div className={styles.navBrand}>
+          <Text size={500} weight="semibold">Rolling-Tons</Text>
+        </div>
+        <Text size={300}>Angebotssoftware</Text>
       </div>
       
       <ul className={styles.navList}>
@@ -134,7 +147,7 @@ export default function Navbar() {
         </div>
         <div>
           <Text weight="semibold">Bill Meixner</Text>
-          <Text size={200} className="ml-2">Vertriebsmitarbeiter</Text>
+          <Text size={200}>Vertriebsmitarbeiter</Text>
         </div>
       </div>
     </nav>

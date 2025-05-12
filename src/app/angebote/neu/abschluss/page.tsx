@@ -9,19 +9,6 @@ import {
   Field,
   Textarea,
   Checkbox,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
-  TableBody,
-  TableCell,
-  Dialog,
-  DialogTrigger,
-  DialogSurface,
-  DialogTitle,
-  DialogBody,
-  DialogActions,
-  DialogContent
 } from "@fluentui/react-components";
 import { 
   ArrowLeftRegular, 
@@ -31,35 +18,80 @@ import {
   MailRegular,
   CheckmarkRegular
 } from "@fluentui/react-icons";
+import { useAngebote } from "@/contexts/AngebotContext";
+import { useWizard } from "@/contexts/WizardContext";
 
 export default function AbschlussAngebot() {
   const router = useRouter();
+  const { addAngebot } = useAngebote();
+  const { wizard } = useWizard();
   const [comments, setComments] = useState("");
-  const [confirmDialog, setConfirmDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
+  const [archivePdf, setArchivePdf] = useState(true);
+  const [isUrgent, setIsUrgent] = useState(false);
   
-  // Beispieldaten, die normalerweise aus einem Context/Store kommen würden
+  // Daten aus dem Wizard-Prozess formatieren
   const angebotsDaten = {
-    nummer: "ANG-2025-043",
-    kunde: "R.A.T.H. Logistik GmbH",
-    ansprechpartner: "Dr. Hans Wagner",
-    transportgut: "Stahl-Coils",
-    route: "Wien Hauptbahnhof → Hamburg Hbf",
-    abfahrt: "15.05.2025, 08:30",
-    ankunft: "16.05.2025, 14:30",
-    menge: "24 Tonnen",
-    summe: "€2.950,00",
-    gültigBis: "30.06.2025"
+    nummer: wizard.angebotsnummer,
+    kunde: wizard.grunddaten.kunde || "Nicht ausgewählt",
+    ansprechpartner: wizard.grunddaten.ansprechpartner || "Nicht ausgewählt",
+    transportgut: wizard.grunddaten.transportgut || "Nicht angegeben",
+    route: `${wizard.route.startbahnhof || "Startbahnhof"} → ${wizard.route.zielbahnhof || "Zielbahnhof"}`,
+    abfahrt: wizard.route.abfahrt || "Nicht festgelegt",
+    ankunft: wizard.route.ankunft || "Nicht festgelegt",
+    menge: `${wizard.grunddaten.menge || "0"} ${wizard.grunddaten.einheit || "t"}`,
+    summe: `€${wizard.kalkulation.bruttosumme.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
+    gültigBis: wizard.grunddaten.gueltigBis || "Nicht festgelegt"
   };
   
   // Navigation zum vorherigen Schritt
   const goToPreviousStep = () => {
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu/kalkulation");
   };
   
-  // Angebot abschließen und zurück zur Übersicht
-  const finishOffer = () => {
-    // Hier würden die Daten gespeichert werden
-    router.push("/angebote");
+  // Direktes Speichern ohne Dialog
+  const saveAndNavigate = () => {
+    console.log("saveAndNavigate wurde aufgerufen");
+    setLoading(true);
+    
+    // Aktuelles Datum für das Erstelldatum
+    const currentDate = new Date();
+    const erstelldatum = currentDate.toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    
+    try {
+      // Angebot zum Context hinzufügen
+      addAngebot({
+        kunde: angebotsDaten.kunde,
+        ansprechpartner: angebotsDaten.ansprechpartner,
+        route: angebotsDaten.route.replace(' → ', ' - '),
+        erstelldatum: erstelldatum,
+        summe: angebotsDaten.summe,
+        status: 'offen' as 'offen',
+        transportgut: angebotsDaten.transportgut,
+        menge: angebotsDaten.menge,
+        abfahrt: angebotsDaten.abfahrt,
+        ankunft: angebotsDaten.ankunft,
+        gueltigBis: angebotsDaten.gültigBis
+      });
+      
+      console.log("Angebot wurde gespeichert");
+      
+      // Keine sofortige Navigation - erst nach einiger Zeit
+      setTimeout(() => {
+        console.log("Navigiere zu /angebote");
+        window.location.href = "/angebote"; // Direktes Umleiten statt Router
+      }, 300);
+    } catch (error) {
+      console.error("Fehler beim Speichern:", error);
+      setLoading(false);
+    }
   };
   
   return (
@@ -97,7 +129,13 @@ export default function AbschlussAngebot() {
             </div>
             <div className="flex space-x-4">
               <Button icon={<SaveRegular />}>Zwischenspeichern</Button>
-              <Button appearance="primary" icon={<DocumentSaveRegular />}>Angebot erstellen</Button>
+              <Button 
+                appearance="primary" 
+                icon={<DocumentSaveRegular />}
+                onClick={() => setShowConfirm(true)}
+              >
+                Angebot erstellen
+              </Button>
             </div>
           </div>
         </div>
@@ -153,15 +191,27 @@ export default function AbschlussAngebot() {
               
               <div className="space-y-4">
                 <Field>
-                  <Checkbox label="E-Mail mit PDF an Kunden senden" />
+                  <Checkbox 
+                    label="E-Mail mit PDF an Kunden senden" 
+                    checked={sendEmail}
+                    onChange={(_, data) => setSendEmail(!!data.checked)}
+                  />
                 </Field>
                 
                 <Field>
-                  <Checkbox label="PDF intern archivieren" defaultChecked />
+                  <Checkbox 
+                    label="PDF intern archivieren" 
+                    checked={archivePdf}
+                    onChange={(_, data) => setArchivePdf(!!data.checked)}
+                  />
                 </Field>
                 
                 <Field>
-                  <Checkbox label="Angebot als dringend markieren" />
+                  <Checkbox 
+                    label="Angebot als dringend markieren" 
+                    checked={isUrgent}
+                    onChange={(_, data) => setIsUrgent(!!data.checked)}
+                  />
                 </Field>
               </div>
               
@@ -193,33 +243,44 @@ export default function AbschlussAngebot() {
               Zurück zur Kalkulation
             </Button>
             
-            <DialogTrigger disableButtonEnhancement>
-              <Button appearance="primary" icon={<CheckmarkRegular />}>
-                Angebot abschließen
-              </Button>
-            </DialogTrigger>
-            
-            <Dialog open={confirmDialog} onOpenChange={(_, { open }) => setConfirmDialog(open)}>
-              <DialogSurface>
-                <DialogBody>
-                  <DialogTitle>Angebot erstellen?</DialogTitle>
-                  <DialogContent>
-                    Möchten Sie das Angebot {angebotsDaten.nummer} für {angebotsDaten.kunde} mit einer Summe von {angebotsDaten.summe} erstellen?
-                  </DialogContent>
-                  <DialogActions>
-                    <Button appearance="secondary" onClick={() => setConfirmDialog(false)}>
-                      Abbrechen
-                    </Button>
-                    <Button appearance="primary" onClick={finishOffer}>
-                      Angebot erstellen
-                    </Button>
-                  </DialogActions>
-                </DialogBody>
-              </DialogSurface>
-            </Dialog>
+            <Button 
+              appearance="primary" 
+              icon={<CheckmarkRegular />}
+              onClick={() => setShowConfirm(true)}
+            >
+              Angebot abschließen
+            </Button>
           </div>
         </div>
       </Card>
+      
+      {/* Simples Confirm Modal statt Dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-semibold mb-4">Angebot erstellen?</h3>
+            <p className="mb-6">
+              Möchten Sie das Angebot {angebotsDaten.nummer} für {angebotsDaten.kunde} mit einer Summe von {angebotsDaten.summe} erstellen?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <Button 
+                appearance="secondary" 
+                onClick={() => setShowConfirm(false)}
+                disabled={loading}
+              >
+                Abbrechen
+              </Button>
+              <Button 
+                appearance="primary" 
+                onClick={saveAndNavigate}
+                disabled={loading}
+              >
+                {loading ? "Wird erstellt..." : "Angebot erstellen"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

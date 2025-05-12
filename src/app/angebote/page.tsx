@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { 
   Button, 
@@ -33,8 +34,86 @@ import {
   DeleteRegular,
   EditRegular
 } from "@fluentui/react-icons";
+import { useAngebote } from "@/contexts/AngebotContext";
 
 export default function Angebote() {
+  const { 
+    angebote, 
+    currentPage, 
+    itemsPerPage, 
+    totalPages, 
+    setPage,
+    deleteAngebot 
+  } = useAngebote();
+  
+  // Filter-Status
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [sortOption, setSortOption] = useState('newest');
+  const [onlyMyOffers, setOnlyMyOffers] = useState(false);
+  
+  // Angebote filtern und sortieren
+  const filteredAngebote = angebote
+    .filter(angebot => {
+      // Suche
+      if (searchQuery && !Object.values(angebot).some(value => 
+        String(value).toLowerCase().includes(searchQuery.toLowerCase())
+      )) {
+        return false;
+      }
+      
+      // Status
+      if (statusFilter !== 'all' && angebot.status !== statusFilter) {
+        return false;
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortOption) {
+        case 'newest':
+          return new Date(b.erstelldatum.split('.').reverse().join('-')).getTime() - 
+                 new Date(a.erstelldatum.split('.').reverse().join('-')).getTime();
+        case 'oldest':
+          return new Date(a.erstelldatum.split('.').reverse().join('-')).getTime() - 
+                 new Date(b.erstelldatum.split('.').reverse().join('-')).getTime();
+        case 'amount-high':
+          return parseFloat(b.summe.replace('€', '').replace('.', '').replace(',', '.')) - 
+                 parseFloat(a.summe.replace('€', '').replace('.', '').replace(',', '.'));
+        case 'amount-low':
+          return parseFloat(a.summe.replace('€', '').replace('.', '').replace(',', '.')) - 
+                 parseFloat(b.summe.replace('€', '').replace('.', '').replace(',', '.'));
+        default:
+          return 0;
+      }
+    });
+  
+  // Paginierte Angebote
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAngebote = filteredAngebote.slice(startIndex, endIndex);
+  
+  // Filter zurücksetzen
+  const resetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setDateFilter('all');
+    setSortOption('newest');
+    setOnlyMyOffers(false);
+  };
+  
+  // Status-Badge-Farbe bestimmen
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'offen': return 'warning';
+      case 'angenommen': return 'success';
+      case 'abgelehnt': return 'danger';
+      case 'storniert': return 'informative';
+      default: return 'neutral';
+    }
+  };
+  
   return (
     <div className="p-6">
       <div className="mb-4">
@@ -63,23 +142,35 @@ export default function Angebote() {
                 id="search"
                 placeholder="Nach Angebotsnr., Kunde, Route..."
                 contentBefore={<Search24Regular />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             
             <div>
               <Label htmlFor="status-filter">Status</Label>
-              <Dropdown id="status-filter" placeholder="Alle Status">
+              <Dropdown 
+                id="status-filter" 
+                placeholder="Alle Status"
+                value={statusFilter}
+                onOptionSelect={(_, data) => setStatusFilter(data.optionValue || 'all')}
+              >
                 <Option value="all">Alle Status</Option>
-                <Option value="open">Offen</Option>
-                <Option value="accepted">Angenommen</Option>
-                <Option value="rejected">Abgelehnt</Option>
-                <Option value="cancelled">Storniert</Option>
+                <Option value="offen">Offen</Option>
+                <Option value="angenommen">Angenommen</Option>
+                <Option value="abgelehnt">Abgelehnt</Option>
+                <Option value="storniert">Storniert</Option>
               </Dropdown>
             </div>
             
             <div>
               <Label htmlFor="date-filter">Datum</Label>
-              <Dropdown id="date-filter" placeholder="Alle Zeiträume">
+              <Dropdown 
+                id="date-filter" 
+                placeholder="Alle Zeiträume"
+                value={dateFilter}
+                onOptionSelect={(_, data) => setDateFilter(data.optionValue || 'all')}
+              >
                 <Option value="all">Alle Zeiträume</Option>
                 <Option value="today">Heute</Option>
                 <Option value="week">Diese Woche</Option>
@@ -90,7 +181,12 @@ export default function Angebote() {
             
             <div>
               <Label htmlFor="sorting">Sortierung</Label>
-              <Dropdown id="sorting" placeholder="Sortieren nach">
+              <Dropdown 
+                id="sorting" 
+                placeholder="Sortieren nach"
+                value={sortOption}
+                onOptionSelect={(_, data) => setSortOption(data.optionValue || 'newest')}
+              >
                 <Option value="newest">Neueste zuerst</Option>
                 <Option value="oldest">Älteste zuerst</Option>
                 <Option value="amount-high">Betrag (hoch-niedrig)</Option>
@@ -100,10 +196,14 @@ export default function Angebote() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button icon={<FilterRegular />}>Filter zurücksetzen</Button>
+            <Button icon={<FilterRegular />} onClick={resetFilters}>Filter zurücksetzen</Button>
             <Button icon={<ArrowDownRegular />}>Exportieren</Button>
             <Divider vertical />
-            <Checkbox label="Meine Angebote" />
+            <Checkbox 
+              label="Meine Angebote" 
+              checked={onlyMyOffers}
+              onChange={(_, data) => setOnlyMyOffers(!!data.checked)}
+            />
           </div>
         </div>
       </Card>
@@ -122,124 +222,89 @@ export default function Angebote() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>ANG-2025-042</TableCell>
-              <TableCell>R.A.T.H. Logistik GmbH</TableCell>
-              <TableCell>Wien - Hamburg</TableCell>
-              <TableCell>04.05.2025</TableCell>
-              <TableCell>€12.450</TableCell>
-              <TableCell><Badge color="warning">Offen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-042">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-041</TableCell>
-              <TableCell>Wiener Transport AG</TableCell>
-              <TableCell>München - Wien</TableCell>
-              <TableCell>02.05.2025</TableCell>
-              <TableCell>€9.870</TableCell>
-              <TableCell><Badge color="success">Angenommen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-041">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-040</TableCell>
-              <TableCell>Alpen Cargo</TableCell>
-              <TableCell>Salzburg - München</TableCell>
-              <TableCell>30.04.2025</TableCell>
-              <TableCell>€7.230</TableCell>
-              <TableCell><Badge color="warning">Offen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-040">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-039</TableCell>
-              <TableCell>ÖBB Rail Cargo</TableCell>
-              <TableCell>Wien - Budapest</TableCell>
-              <TableCell>28.04.2025</TableCell>
-              <TableCell>€5.600</TableCell>
-              <TableCell><Badge color="danger">Abgelehnt</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-039">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-038</TableCell>
-              <TableCell>Swiss Rail Solutions</TableCell>
-              <TableCell>Zürich - Wien</TableCell>
-              <TableCell>25.04.2025</TableCell>
-              <TableCell>€18.320</TableCell>
-              <TableCell><Badge color="success">Angenommen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-038">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-037</TableCell>
-              <TableCell>Deutsche Bahn Cargo</TableCell>
-              <TableCell>Berlin - Wien</TableCell>
-              <TableCell>22.04.2025</TableCell>
-              <TableCell>€14.990</TableCell>
-              <TableCell><Badge color="success">Angenommen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-037">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ANG-2025-036</TableCell>
-              <TableCell>Vienna Rail GmbH</TableCell>
-              <TableCell>Wien - Budapest</TableCell>
-              <TableCell>20.04.2025</TableCell>
-              <TableCell>€6.840</TableCell>
-              <TableCell><Badge color="warning">Offen</Badge></TableCell>
-              <TableCell className="flex space-x-2">
-                <Link href="/angebote/ang-2025-036">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                </Link>
-                <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-              </TableCell>
-            </TableRow>
+            {paginatedAngebote.length > 0 ? (
+              paginatedAngebote.map((angebot) => (
+                <TableRow key={angebot.id}>
+                  <TableCell>{angebot.nummer}</TableCell>
+                  <TableCell>{angebot.kunde}</TableCell>
+                  <TableCell>{angebot.route}</TableCell>
+                  <TableCell>{angebot.erstelldatum}</TableCell>
+                  <TableCell>{angebot.summe}</TableCell>
+                  <TableCell>
+                    <Badge color={getStatusBadgeColor(angebot.status)}>
+                      {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="flex space-x-2">
+                    <Link href={`/angebote/${angebot.id}`}>
+                      <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
+                    </Link>
+                    <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                    <Link href={`/angebote/${angebot.id}/bearbeiten`}>
+                      <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  <FluentText size={300}>Keine passenden Angebote gefunden.</FluentText>
+                  <div className="mt-2">
+                    <Button onClick={resetFilters}>Filter zurücksetzen</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         
         <div className="p-4 flex justify-between items-center">
-          <FluentText>Zeige 1-7 von 42 Angeboten</FluentText>
-          <div className="flex space-x-2">
-            <Button appearance="subtle" disabled>Zurück</Button>
-            <Button appearance="subtle">1</Button>
-            <Button appearance="subtle">2</Button>
-            <Button appearance="subtle">3</Button>
-            <Button appearance="subtle">4</Button>
-            <Button appearance="subtle">Weiter</Button>
-          </div>
+          <FluentText>
+            Zeige {Math.min(filteredAngebote.length, startIndex + 1)}-{Math.min(filteredAngebote.length, endIndex)} von {filteredAngebote.length} Angeboten
+          </FluentText>
+          {totalPages > 1 && (
+            <div className="flex space-x-2">
+              <Button 
+                appearance="subtle" 
+                disabled={currentPage === 1}
+                onClick={() => setPage(currentPage - 1)}
+              >
+                Zurück
+              </Button>
+              
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Einfache Paginierung für maximal 5 Seiten
+                let pageNum = i + 1;
+                
+                // Falls wir mehr als 5 Seiten haben, stellen wir sicher, dass die aktuelle Seite zu sehen ist
+                if (totalPages > 5 && currentPage > 3) {
+                  pageNum = Math.min(totalPages - 4 + i, totalPages);
+                  if (currentPage > totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  }
+                }
+                
+                return (
+                  <Button 
+                    key={pageNum}
+                    appearance={currentPage === pageNum ? "primary" : "subtle"}
+                    onClick={() => setPage(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              
+              <Button 
+                appearance="subtle" 
+                disabled={currentPage === totalPages}
+                onClick={() => setPage(currentPage + 1)}
+              >
+                Weiter
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
     </div>

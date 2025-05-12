@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import dynamic from 'next/dynamic';
 import "./globals.css";
 import { ReactNode } from "react";
+import { AngebotProvider } from "@/contexts/AngebotContext";
+import { WizardProvider } from "@/contexts/WizardContext";
 
 // Typdefinition für die Props des ClientLayoutWrappers
 interface ClientLayoutWrapperProps {
@@ -30,7 +32,11 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={inter.className}>
-        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        <AngebotProvider>
+          <WizardProvider>
+            <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+          </WizardProvider>
+        </AngebotProvider>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Button,
@@ -18,6 +18,7 @@ import {
   SaveRegular,
   DocumentSaveRegular
 } from "@fluentui/react-icons";
+import { useWizard } from "@/contexts/WizardContext";
 
 // Einfache Dropdown-Komponente für Bahnhöfe
 function SimpleDropdown({ 
@@ -65,10 +66,9 @@ function SimpleDropdown({
 
 export default function RouteAngebot() {
   const router = useRouter();
-  const [startBahnhof, setStartBahnhof] = useState("");
-  const [zielBahnhof, setZielBahnhof] = useState("");
+  const { wizard, updateRoute } = useWizard();
   
-  // Bahnhöfe-Optionen
+  // Bahnhöfe-Optionen - VOR useState verschoben
   const bahnhofOptions = [
     { value: "wien", label: "Wien Hauptbahnhof" },
     { value: "graz", label: "Graz Hauptbahnhof" },
@@ -80,13 +80,142 @@ export default function RouteAngebot() {
     { value: "muenchen", label: "München Hbf" }
   ];
   
+  // Lokale Zustandsvariablen für Formulardaten
+  const [startBahnhofValue, setStartBahnhofValue] = useState(() => {
+    // Suchen des Bahnhofs in den Optionen basierend auf dem gespeicherten Wert
+    const savedBahnhof = wizard.route.startbahnhof;
+    if (!savedBahnhof) return "";
+    
+    const option = bahnhofOptions.find(opt => opt.label === savedBahnhof);
+    return option ? option.value : "";
+  });
+  
+  const [zielBahnhofValue, setZielBahnhofValue] = useState(() => {
+    const savedBahnhof = wizard.route.zielbahnhof;
+    if (!savedBahnhof) return "";
+    
+    const option = bahnhofOptions.find(opt => opt.label === savedBahnhof);
+    return option ? option.value : "";
+  });
+  
+  const [abfahrtsdatum, setAbfahrtsdatum] = useState(() => {
+    // Extrahiere das Datum aus dem savedAbfahrt-String, falls vorhanden
+    if (wizard.route.abfahrt) {
+      const parts = wizard.route.abfahrt.split(', ');
+      if (parts.length > 0) {
+        const dateParts = parts[0].split('.');
+        if (dateParts.length === 3) {
+          return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        }
+      }
+    }
+    return "";
+  });
+  
+  const [abfahrtszeit, setAbfahrtszeit] = useState(() => {
+    // Extrahiere die Zeit aus dem savedAbfahrt-String, falls vorhanden
+    if (wizard.route.abfahrt) {
+      const parts = wizard.route.abfahrt.split(', ');
+      if (parts.length > 1) {
+        return parts[1];
+      }
+    }
+    return "";
+  });
+  
+  const [ankunftsdatum, setAnkunftsdatum] = useState(() => {
+    if (wizard.route.ankunft) {
+      const parts = wizard.route.ankunft.split(', ');
+      if (parts.length > 0) {
+        const dateParts = parts[0].split('.');
+        if (dateParts.length === 3) {
+          return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        }
+      }
+    }
+    return "";
+  });
+  
+  const [ankunftszeit, setAnkunftszeit] = useState(() => {
+    if (wizard.route.ankunft) {
+      const parts = wizard.route.ankunft.split(', ');
+      if (parts.length > 1) {
+        return parts[1];
+      }
+    }
+    return "";
+  });
+  
+  const [fahrzeit, setFahrzeit] = useState(8);
+  
+  // Aktualisiere den WizardContext mit aktuellen Daten (separiert für besseres Callback-Handling)
+  const updateContext = useCallback(() => {
+    const startbahnhof = startBahnhofValue ? 
+      bahnhofOptions.find(opt => opt.value === startBahnhofValue)?.label || "" : "";
+    
+    const zielbahnhof = zielBahnhofValue ? 
+      bahnhofOptions.find(opt => opt.value === zielBahnhofValue)?.label || "" : "";
+    
+    // Formatiere Abfahrt und Ankunft im Format "DD.MM.YYYY, HH:MM"
+    let abfahrt = "";
+    if (abfahrtsdatum) {
+      const dateParts = abfahrtsdatum.split('-');
+      const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+      abfahrt = abfahrtszeit ? `${formattedDate}, ${abfahrtszeit}` : formattedDate;
+    }
+    
+    let ankunft = "";
+    if (ankunftsdatum) {
+      const dateParts = ankunftsdatum.split('-');
+      const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+      ankunft = ankunftszeit ? `${formattedDate}, ${ankunftszeit}` : formattedDate;
+    }
+    
+    updateRoute({
+      startbahnhof,
+      zielbahnhof,
+      abfahrt,
+      ankunft
+    });
+  }, [startBahnhofValue, zielBahnhofValue, abfahrtsdatum, abfahrtszeit, ankunftsdatum, ankunftszeit, updateRoute, bahnhofOptions]);
+  
+  // Aktualisiere den WizardContext, wenn sich die Routendaten ändern
+  /*
+  useEffect(() => {
+    updateContext();
+  }, [updateContext]);
+  */
+  
+  // Berechne Ankunftszeit, wenn Abfahrtszeit und Fahrzeit eingegeben wurden
+  useEffect(() => {
+    if (abfahrtsdatum && abfahrtszeit && fahrzeit) {
+      const abfahrtDateTime = new Date(`${abfahrtsdatum}T${abfahrtszeit}`);
+      const ankunftDateTime = new Date(abfahrtDateTime.getTime() + fahrzeit * 60 * 60 * 1000);
+      
+      // Formatiere Datum und Zeit für die Ankunft
+      const ankunftDate = ankunftDateTime.toISOString().split('T')[0];
+      const hours = ankunftDateTime.getHours().toString().padStart(2, '0');
+      const minutes = ankunftDateTime.getMinutes().toString().padStart(2, '0');
+      const ankunftTime = `${hours}:${minutes}`;
+      
+      setAnkunftsdatum(ankunftDate);
+      setAnkunftszeit(ankunftTime);
+    }
+  }, [abfahrtsdatum, abfahrtszeit, fahrzeit]);
+  
   // Navigation zum vorherigen Schritt
   const goToPreviousStep = () => {
+    // Sicherstellen, dass der Kontext gespeichert ist
+    updateContext();
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu");
   };
   
   // Navigation zum nächsten Schritt
   const goToNextStep = () => {
+    // Sicherstellen, dass der Kontext gespeichert ist
+    updateContext();
+    // Sanfte Navigation mit Next.js Router
     router.push("/angebote/neu/kalkulation");
   };
   
@@ -137,8 +266,8 @@ export default function RouteAngebot() {
                 <SimpleDropdown 
                   options={bahnhofOptions} 
                   placeholder="Startbahnhof auswählen..." 
-                  value={startBahnhof} 
-                  onChange={setStartBahnhof}
+                  value={startBahnhofValue} 
+                  onChange={setStartBahnhofValue}
                 />
               </Field>
               
@@ -146,35 +275,59 @@ export default function RouteAngebot() {
                 <SimpleDropdown 
                   options={bahnhofOptions} 
                   placeholder="Zielbahnhof auswählen..." 
-                  value={zielBahnhof} 
-                  onChange={setZielBahnhof}
+                  value={zielBahnhofValue} 
+                  onChange={setZielBahnhofValue}
                 />
               </Field>
               
               <Field label="Entfernung (km)" className="mt-4">
-                <Input readOnly value={startBahnhof && zielBahnhof ? "450" : ""} disabled />
+                <Input readOnly value={startBahnhofValue && zielBahnhofValue ? "450" : ""} disabled />
               </Field>
             </div>
             
             <div>
               <Field label="Abfahrtsdatum" required>
-                <Input type="date" />
+                <Input 
+                  type="date" 
+                  value={abfahrtsdatum} 
+                  onChange={(e) => setAbfahrtsdatum(e.target.value)}
+                />
               </Field>
               
               <Field label="Abfahrtszeit" className="mt-4">
-                <Input type="time" />
+                <Input 
+                  type="time" 
+                  value={abfahrtszeit} 
+                  onChange={(e) => setAbfahrtszeit(e.target.value)}
+                />
               </Field>
               
               <Field label="Fahrzeit (Stunden)" className="mt-4">
-                <SpinButton defaultValue={8} min={1} max={72} step={0.5} />
+                <SpinButton 
+                  value={fahrzeit} 
+                  min={1} 
+                  max={72} 
+                  step={0.5}
+                  onChange={(e, data) => setFahrzeit(data?.value || 8)}
+                />
               </Field>
               
               <Field label="Ankunftsdatum" className="mt-4">
-                <Input type="date" />
+                <Input 
+                  type="date" 
+                  value={ankunftsdatum} 
+                  onChange={(e) => setAnkunftsdatum(e.target.value)}
+                  disabled={!!abfahrtsdatum && !!abfahrtszeit && !!fahrzeit}
+                />
               </Field>
               
               <Field label="Ankunftszeit" className="mt-4">
-                <Input type="time" />
+                <Input 
+                  type="time" 
+                  value={ankunftszeit} 
+                  onChange={(e) => setAnkunftszeit(e.target.value)}
+                  disabled={!!abfahrtsdatum && !!abfahrtszeit && !!fahrzeit}
+                />
               </Field>
             </div>
           </div>
