@@ -150,20 +150,22 @@ export default function Stammdaten() {
                           {bahnhof.status === 'aktiv' ? 'Aktiv' : 'Inaktiv'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="flex space-x-2">
-                        <Link href={`/stammdaten/bahnhoefe/${bahnhof.id}`}>
-                          <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
-                        </Link>
-                        <Button 
-                          icon={<DeleteRegular />} 
-                          size="small"
-                          onClick={() => {
-                            setConfirmDeleteId(bahnhof.id);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          Löschen
-                        </Button>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Link href={`/stammdaten/bahnhoefe/${bahnhof.id}`}>
+                            <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
+                          </Link>
+                          <Button 
+                            icon={<DeleteRegular />} 
+                            size="small"
+                            onClick={() => {
+                              setConfirmDeleteId(bahnhof.id);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            Löschen
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -174,14 +176,17 @@ export default function Stammdaten() {
                 <Card className="flex-1">
                   <div className="p-4">
                     <div className="flex items-center mb-3">
-                      <AppsRegular className="mr-2 text-blue-600" />
-                      <Text weight="semibold">Bahnhöfe pro Land</Text>
+                      <AppsRegular className="mr-2 text-blue-600 text-xl" />
+                      <Text weight="semibold" size={400}>Bahnhöfe pro Land</Text>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-6">
                       {Object.entries(bahnhoefeLaender).map(([land, anzahl]) => (
-                        <div key={land}>
-                          <Text>{land}</Text>
-                          <Title2>{anzahl}</Title2>
+                        <div key={land} className="border-b pb-2">
+                          <Text className="text-sm text-gray-500">{land}</Text>
+                          <div className="flex items-baseline gap-2">
+                            <Title2>{anzahl}</Title2>
+                            <Text size={200} className="text-gray-500">Bahnhöfe</Text>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -191,25 +196,37 @@ export default function Stammdaten() {
                 <Card className="flex-1">
                   <div className="p-4">
                     <div className="flex items-center mb-3">
-                      <MoneyRegular className="mr-2 text-green-600" />
-                      <Text weight="semibold">Kostenkomponenten Status</Text>
+                      <MoneyRegular className="mr-2 text-green-600 text-xl" />
+                      <Text weight="semibold" size={400}>Kostenkomponenten Status</Text>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Text>Aktive Kostenelemente</Text>
-                        <Title2>34</Title2>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Aktive Kostenelemente</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>34</Title2>
+                          <Text size={200} className="text-gray-500">Elemente</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Inaktive Elemente</Text>
-                        <Title2>8</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Inaktive Elemente</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>8</Title2>
+                          <Text size={200} className="text-gray-500">Elemente</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Laufende Verträge</Text>
-                        <Title2>12</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Laufende Verträge</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>12</Title2>
+                          <Text size={200} className="text-gray-500">Verträge</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Ablaufende Verträge</Text>
-                        <Title2>3</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Ablaufende Verträge</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>3</Title2>
+                          <Text size={200} className="text-gray-500">Verträge</Text>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -218,25 +235,37 @@ export default function Stammdaten() {
                 <Card className="flex-1">
                   <div className="p-4">
                     <div className="flex items-center mb-3">
-                      <BuildingRegular className="mr-2 text-purple-600" />
-                      <Text weight="semibold">Partner & Lieferanten</Text>
+                      <BuildingRegular className="mr-2 text-purple-600 text-xl" />
+                      <Text weight="semibold" size={400}>Partner & Lieferanten</Text>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Text>Aktive Partner</Text>
-                        <Title2>16</Title2>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Aktive Partner</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>16</Title2>
+                          <Text size={200} className="text-gray-500">Partner</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Aktive Lieferanten</Text>
-                        <Title2>22</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Aktive Lieferanten</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>22</Title2>
+                          <Text size={200} className="text-gray-500">Lieferanten</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Neue Partner (30d)</Text>
-                        <Title2>2</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Neue Partner (30d)</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>2</Title2>
+                          <Text size={200} className="text-gray-500">Partner</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>Bewertung (Ø)</Text>
-                        <Title2>4.2</Title2>
+                      <div className="border-b pb-2">
+                        <Text className="text-sm text-gray-500">Bewertung (Ø)</Text>
+                        <div className="flex items-baseline gap-2">
+                          <Title2>4.2</Title2>
+                          <Text size={200} className="text-gray-500">von 5</Text>
+                        </div>
                       </div>
                     </div>
                   </div>
