@@ -49,7 +49,8 @@ interface KundenContextType {
   kunden: Kunde[];
   getKundeById: (id: string) => Kunde | undefined;
   addKunde: (kunde: Omit<Kunde, 'id'>) => Kunde;
-  // updateKunde, deleteKunde könnten hier hinzugefügt werden
+  updateKunde: (id: string, kundeData: Partial<Omit<Kunde, 'id'>>) => Kunde | undefined;
+  deleteKunde: (id: string) => void;
 }
 
 // Erstellen des Context
@@ -85,12 +86,32 @@ export function KundenProvider({ children }: { children: ReactNode }) {
     return newKunde;
   };
 
+  const updateKunde = (id: string, kundeData: Partial<Omit<Kunde, 'id'>>) => {
+    let updatedKunde: Kunde | undefined = undefined;
+    setKunden(prevKunden =>
+      prevKunden.map(kunde => {
+        if (kunde.id === id) {
+          updatedKunde = { ...kunde, ...kundeData };
+          return updatedKunde;
+        }
+        return kunde;
+      })
+    );
+    return updatedKunde;
+  };
+
+  const deleteKunde = (id: string) => {
+    setKunden(prevKunden => prevKunden.filter(kunde => kunde.id !== id));
+  };
+
   return (
     <KundenContext.Provider
       value={{
         kunden,
         getKundeById,
-        addKunde
+        addKunde,
+        updateKunde,
+        deleteKunde
       }}
     >
       {children}
