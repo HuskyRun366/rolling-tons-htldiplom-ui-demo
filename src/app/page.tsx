@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { 
   Card, 
@@ -7,6 +8,7 @@ import {
   Button,
   TabList,
   Tab,
+  TabValue,
   Table,
   TableHeader,
   TableRow,
@@ -23,8 +25,29 @@ import {
   People24Regular, 
   ShoppingBag24Regular 
 } from "@fluentui/react-icons";
+import { useAngebote, Angebot } from "@/contexts/AngebotContext";
+
+const getStatusBadgeColor = (status: Angebot['status']) => {
+  switch (status) {
+    case 'offen': return 'warning';
+    case 'angenommen': return 'success';
+    case 'abgelehnt': return 'danger';
+    case 'storniert': return 'informative';
+    default: return 'subtle';
+  }
+};
 
 export default function Dashboard() {
+  const { angebote } = useAngebote();
+  const [selectedTab, setSelectedTab] = useState<TabValue>("offen");
+
+  const filteredAngebote = useMemo(() => {
+    if (selectedTab === "alle") {
+      return angebote;
+    }
+    return angebote.filter(angebot => angebot.status === selectedTab);
+  }, [angebote, selectedTab]);
+
   return (
     <main className="flex min-h-screen flex-col p-6">
       <header className="mb-6">
@@ -45,8 +68,8 @@ export default function Dashboard() {
             <DocumentText24Regular className="mr-2 text-blue-600" />
             <span className="font-semibold">Offene Angebote</span>
           </div>
-          <Title3>24</Title3>
-          <span className="text-xs">Gesamtwert: €245.600</span>
+          <Title3>{angebote.filter(a => a.status === 'offen').length}</Title3>
+          <span className="text-xs">Gesamtwert: €{angebote.filter(a => a.status === 'offen').reduce((sum, a) => sum + parseFloat(a.summe.replace('€', '').replace('.', '').replace(',', '.')), 0).toLocaleString('de-DE')}</span>
         </Card>
         
         <Card className="p-4">
@@ -54,8 +77,8 @@ export default function Dashboard() {
             <ShoppingBag24Regular className="mr-2 text-green-600" />
             <span className="font-semibold">Angenommene Angebote</span>
           </div>
-          <Title3>18</Title3>
-          <span className="text-xs">Erfolgsquote: 62%</span>
+          <Title3>{angebote.filter(a => a.status === 'angenommen').length}</Title3>
+          <span className="text-xs">Erfolgsquote: {angebote.length > 0 ? ((angebote.filter(a => a.status === 'angenommen').length / angebote.length) * 100).toFixed(0) : 0}%</span>
         </Card>
         
         <Card className="p-4">
@@ -71,7 +94,10 @@ export default function Dashboard() {
       <Card className="mb-6">
         <div className="px-4 pt-4">
           <Title3>Aktuelle Angebote</Title3>
-          <TabList defaultSelectedValue="offen">
+          <TabList 
+            selectedValue={selectedTab} 
+            onTabSelect={(_, data) => setSelectedTab(data.value)}
+          >
             <Tab value="alle">Alle</Tab>
             <Tab value="offen">Offen</Tab>
             <Tab value="angenommen">Angenommen</Tab>
@@ -91,62 +117,34 @@ export default function Dashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>ANG-2025-042</TableCell>
-                <TableCell>R.A.T.H. Logistik GmbH</TableCell>
-                <TableCell>Wien - Hamburg</TableCell>
-                <TableCell>04.05.2025</TableCell>
-                <TableCell style={{ minWidth: '150px' }}><Badge color="warning">Offen</Badge></TableCell>
-                <TableCell>€12.450</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end items-center space-x-2 mr-1">
-                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
-                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>ANG-2025-041</TableCell>
-                <TableCell>Wiener Transport AG</TableCell>
-                <TableCell>München - Wien</TableCell>
-                <TableCell>02.05.2025</TableCell>
-                <TableCell style={{ minWidth: '150px' }}><Badge color="success">Angenommen</Badge></TableCell>
-                <TableCell>€9.870</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end items-center space-x-2 mr-1">
-                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
-                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>ANG-2025-040</TableCell>
-                <TableCell>Alpen Cargo</TableCell>
-                <TableCell>Salzburg - München</TableCell>
-                <TableCell>30.04.2025</TableCell>
-                <TableCell style={{ minWidth: '150px' }}><Badge color="warning">Offen</Badge></TableCell>
-                <TableCell>€7.230</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end items-center space-x-2 mr-1">
-                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
-                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>ANG-2025-039</TableCell>
-                <TableCell>ÖBB Rail Cargo</TableCell>
-                <TableCell>Wien - Budapest</TableCell>
-                <TableCell>28.04.2025</TableCell>
-                <TableCell style={{ minWidth: '150px' }}><Badge color="danger">Abgelehnt</Badge></TableCell>
-                <TableCell>€5.600</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end items-center space-x-2 mr-1">
-                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
-                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {filteredAngebote.length > 0 ? (
+                filteredAngebote.map((angebot) => (
+                  <TableRow key={angebot.id}>
+                    <TableCell>{angebot.nummer}</TableCell>
+                    <TableCell>{angebot.kunde}</TableCell>
+                    <TableCell>{angebot.route}</TableCell>
+                    <TableCell>{angebot.erstelldatum}</TableCell>
+                    <TableCell style={{ minWidth: '150px' }}>
+                      <Badge color={getStatusBadgeColor(angebot.status) as any}>{angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}</Badge>
+                    </TableCell>
+                    <TableCell>{angebot.summe}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end items-center space-x-2 mr-1">
+                        <Link href={`/angebote/${angebot.id}`} passHref>
+                           <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
+                        </Link>
+                        <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
+                    Keine Angebote für den gewählten Status gefunden.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -168,16 +166,6 @@ export default function Dashboard() {
                 <TableCell>Alpen Cargo</TableCell>
                 <TableCell>Karl Meyer</TableCell>
                 <TableCell>29.04.2025</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>TransEuropa Logistics</TableCell>
-                <TableCell>Maria Berger</TableCell>
-                <TableCell>25.04.2025</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Vienna Rail GmbH</TableCell>
-                <TableCell>Thomas Huber</TableCell>
-                <TableCell>20.04.2025</TableCell>
               </TableRow>
             </TableBody>
           </Table>
