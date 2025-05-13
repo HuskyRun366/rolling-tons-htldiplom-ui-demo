@@ -60,8 +60,8 @@ const KundenContext = createContext<KundenContextType | undefined>(undefined);
 export function KundenProvider({ children }: { children: ReactNode }) {
   const [kunden, setKunden] = useState<Kunde[]>(() => {
     if (typeof window !== 'undefined') {
-      const savedKunden = localStorage.getItem('kunden');
-      return savedKunden ? JSON.parse(savedKunden) : initialKunden;
+      const storedKunden = localStorage.getItem('kunden');
+      return storedKunden ? JSON.parse(storedKunden) : initialKunden;
     }
     return initialKunden;
   });

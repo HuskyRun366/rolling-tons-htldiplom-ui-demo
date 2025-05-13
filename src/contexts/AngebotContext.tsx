@@ -116,11 +116,10 @@ const AngebotContext = createContext<AngebotContextType | undefined>(undefined);
 
 // Provider Komponente
 export function AngebotProvider({ children }: { children: ReactNode }) {
-  // Angebote aus localStorage laden, falls vorhanden
   const [angebote, setAngebote] = useState<Angebot[]>(() => {
     if (typeof window !== 'undefined') {
-      const savedAngebote = localStorage.getItem('angebote');
-      return savedAngebote ? JSON.parse(savedAngebote) : initialAngebote;
+      const storedAngebote = localStorage.getItem('angebote');
+      return storedAngebote ? JSON.parse(storedAngebote) : initialAngebote;
     }
     return initialAngebote;
   });

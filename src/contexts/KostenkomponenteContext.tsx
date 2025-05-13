@@ -87,11 +87,25 @@ const initialKostenkomponenten: Kostenkomponente[] = [
 export const KostenkomponenteProvider = ({ children }: { children: ReactNode }) => {
   const [kostenkomponenten, setKostenkomponenten] = useState<Kostenkomponente[]>(() => {
     if (typeof window !== 'undefined') {
+      // Check if we need to force test data
+      const forceTestData = sessionStorage.getItem('forceTestData') === 'true';
+      if (forceTestData) {
+        localStorage.setItem('kostenkomponenten', JSON.stringify(initialKostenkomponenten));
+        return initialKostenkomponenten;
+      }
+      
       const stored = localStorage.getItem('kostenkomponenten');
       return stored ? JSON.parse(stored) : initialKostenkomponenten;
     }
     return initialKostenkomponenten;
   });
+
+  // First time initialization - save test data if nothing exists
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('kostenkomponenten')) {
+      localStorage.setItem('kostenkomponenten', JSON.stringify(initialKostenkomponenten));
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

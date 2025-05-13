@@ -170,6 +170,17 @@ export default function Stammdaten() {
 
       <div className="flex justify-between items-center mb-6">
         <Title2>Stammdaten</Title2>
+        <Button 
+          appearance="subtle"
+          onClick={() => {
+            localStorage.clear();
+            sessionStorage.removeItem('dataInitialized');
+            sessionStorage.setItem('forceTestData', 'true');
+            window.location.reload();
+          }}
+        >
+          Testdaten neu laden
+        </Button>
       </div>
 
       <Card>

@@ -46,7 +46,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '3',
     name: 'Bahnhof C',
     bahnhofId: 'BHC001',
-    land: 'Land 2',
+    land: 'Land 1',
     region: 'Region C',
     status: 'aktiv'
   },
@@ -62,7 +62,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '5',
     name: 'Bahnhof E',
     bahnhofId: 'BHE001',
-    land: 'Land 3',
+    land: 'Land 2',
     region: 'Region E',
     status: 'aktiv'
   },
@@ -78,7 +78,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '7',
     name: 'Bahnhof G',
     bahnhofId: 'BHG001',
-    land: 'Land 4',
+    land: 'Land 3',
     region: 'Region G',
     status: 'aktiv'
   },
@@ -86,7 +86,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '8',
     name: 'Bahnhof H',
     bahnhofId: 'BHH001',
-    land: 'Land 4',
+    land: 'Land 3',
     region: 'Region H',
     status: 'aktiv'
   },
@@ -94,7 +94,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '9',
     name: 'Bahnhof I',
     bahnhofId: 'BHI001',
-    land: 'Land 5',
+    land: 'Land 3',
     region: 'Region I',
     status: 'aktiv'
   },
@@ -102,7 +102,7 @@ const initialBahnhoefe: Bahnhof[] = [
     id: '10',
     name: 'Bahnhof J',
     bahnhofId: 'BHJ001',
-    land: 'Land 5',
+    land: 'Land 4',
     region: 'Region J',
     status: 'aktiv'
   }
@@ -110,20 +110,34 @@ const initialBahnhoefe: Bahnhof[] = [
 
 // Provider component
 export const BahnhofProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  // Initialize state with sample data
-  const [bahnhoefe, setBahnhoefe] = useState<Bahnhof[]>(initialBahnhoefe);
+  // Initialize state with sample data from localStorage if available, otherwise use initialBahnhoefe
+  const [bahnhoefe, setBahnhoefe] = useState<Bahnhof[]>(() => {
+    if (typeof window !== 'undefined') {
+      // Check if we need to force test data
+      const forceTestData = sessionStorage.getItem('forceTestData') === 'true';
+      if (forceTestData) {
+        localStorage.setItem('bahnhoefe', JSON.stringify(initialBahnhoefe));
+        return initialBahnhoefe;
+      }
+      
+      const storedBahnhoefe = localStorage.getItem('bahnhoefe');
+      return storedBahnhoefe ? JSON.parse(storedBahnhoefe) : initialBahnhoefe;
+    }
+    return initialBahnhoefe;
+  });
 
-  // Load data from localStorage on initial render
+  // First time initialization - save test data if nothing exists
   useEffect(() => {
-    const storedBahnhoefe = localStorage.getItem('bahnhoefe');
-    if (storedBahnhoefe) {
-      setBahnhoefe(JSON.parse(storedBahnhoefe));
+    if (typeof window !== 'undefined' && !localStorage.getItem('bahnhoefe')) {
+      localStorage.setItem('bahnhoefe', JSON.stringify(initialBahnhoefe));
     }
   }, []);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
-    localStorage.setItem('bahnhoefe', JSON.stringify(bahnhoefe));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('bahnhoefe', JSON.stringify(bahnhoefe));
+    }
   }, [bahnhoefe]);
 
   // Get a railway station by ID

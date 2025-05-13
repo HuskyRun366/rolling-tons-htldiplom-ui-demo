@@ -20,8 +20,19 @@ export default function ClientLayoutWrapper({ children }: ClientLayoutWrapperPro
   // Force clear localStorage on component mount to ensure test data is used
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      console.log('Clearing localStorage to use test data');
-      localStorage.clear();
+      // Check if we need to reload with fresh data
+      const needsReload = sessionStorage.getItem('dataInitialized') !== 'true';
+      
+      if (needsReload) {
+        console.log('Clearing localStorage to use test data');
+        localStorage.clear();
+        // Mark that we've initialized data
+        sessionStorage.setItem('dataInitialized', 'true');
+        // Set flag to force test data
+        sessionStorage.setItem('forceTestData', 'true');
+        // Force reload the page once to ensure all contexts reinitialize
+        window.location.reload();
+      }
     }
   }, []);
 
