@@ -85,8 +85,8 @@ export default function Dashboard() {
                 <TableHeaderCell>Kunde</TableHeaderCell>
                 <TableHeaderCell>Route</TableHeaderCell>
                 <TableHeaderCell>Erstelldatum</TableHeaderCell>
+                <TableHeaderCell style={{ minWidth: '150px' }}>Status</TableHeaderCell>
                 <TableHeaderCell>Summe</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
                 <TableHeaderCell>Aktionen</TableHeaderCell>
               </TableRow>
             </TableHeader>
@@ -96,11 +96,13 @@ export default function Dashboard() {
                 <TableCell>R.A.T.H. Logistik GmbH</TableCell>
                 <TableCell>Wien - Hamburg</TableCell>
                 <TableCell>04.05.2025</TableCell>
+                <TableCell style={{ minWidth: '150px' }}><Badge color="warning">Offen</Badge></TableCell>
                 <TableCell>€12.450</TableCell>
-                <TableCell><Badge color="warning">Offen</Badge></TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                  <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center space-x-2 mr-1">
+                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
+                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -108,11 +110,13 @@ export default function Dashboard() {
                 <TableCell>Wiener Transport AG</TableCell>
                 <TableCell>München - Wien</TableCell>
                 <TableCell>02.05.2025</TableCell>
+                <TableCell style={{ minWidth: '150px' }}><Badge color="success">Angenommen</Badge></TableCell>
                 <TableCell>€9.870</TableCell>
-                <TableCell><Badge color="success">Angenommen</Badge></TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                  <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center space-x-2 mr-1">
+                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
+                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -120,11 +124,13 @@ export default function Dashboard() {
                 <TableCell>Alpen Cargo</TableCell>
                 <TableCell>Salzburg - München</TableCell>
                 <TableCell>30.04.2025</TableCell>
+                <TableCell style={{ minWidth: '150px' }}><Badge color="warning">Offen</Badge></TableCell>
                 <TableCell>€7.230</TableCell>
-                <TableCell><Badge color="warning">Offen</Badge></TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                  <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center space-x-2 mr-1">
+                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
+                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -132,11 +138,13 @@ export default function Dashboard() {
                 <TableCell>ÖBB Rail Cargo</TableCell>
                 <TableCell>Wien - Budapest</TableCell>
                 <TableCell>28.04.2025</TableCell>
+                <TableCell style={{ minWidth: '150px' }}><Badge color="danger">Abgelehnt</Badge></TableCell>
                 <TableCell>€5.600</TableCell>
-                <TableCell><Badge color="danger">Abgelehnt</Badge></TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
-                  <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center space-x-2 mr-1">
+                    <Button icon={<DocumentSearch24Regular />} size="medium">Details</Button>
+                    <Button icon={<DocumentPdf20Regular />} size="medium">PDF</Button>
+                  </div>
                 </TableCell>
               </TableRow>
             </TableBody>
