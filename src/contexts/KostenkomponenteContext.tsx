@@ -9,7 +9,6 @@ export interface Kostenkomponente {
   beschreibung?: string;
   typ: 'Trassenpreis' | 'Lokomotivkosten' | 'Personalkosten' | 'Energiekosten' | 'Waggonkosten' | 'Sonstiges';
   betrag: number; // The monetary value
-  einheit: string; // e.g., "EUR/km", "EUR/Stunde", "EUR/kWh", "EUR/Tag"
   waehrung: string; // e.g., "EUR"
   gueltigVon: string; // ISO date string, e.g., "2023-01-01"
   gueltigBis?: string; // ISO date string, optional
@@ -38,7 +37,6 @@ const initialKostenkomponenten: Kostenkomponente[] = [
     name: "Trassenpreis Standard Deutschland",
     typ: "Trassenpreis",
     betrag: 5.50,
-    einheit: "EUR/km",
     waehrung: "EUR",
     gueltigVon: "2024-01-01",
     version: 1,
@@ -50,7 +48,6 @@ const initialKostenkomponenten: Kostenkomponente[] = [
     name: "Lokmiete Vectron MS",
     typ: "Lokomotivkosten",
     betrag: 120.00,
-    einheit: "EUR/Stunde",
     waehrung: "EUR",
     gueltigVon: "2024-01-01",
     gueltigBis: "2024-12-31",
@@ -63,7 +60,6 @@ const initialKostenkomponenten: Kostenkomponente[] = [
     name: "Personalkosten Lokführer",
     typ: "Personalkosten",
     betrag: 85.00,
-    einheit: "EUR/Stunde",
     waehrung: "EUR",
     gueltigVon: "2023-07-01",
     version: 2,
@@ -75,7 +71,6 @@ const initialKostenkomponenten: Kostenkomponente[] = [
     name: "Energiekosten Bahnstrom",
     typ: "Energiekosten",
     betrag: 0.25,
-    einheit: "EUR/kWh",
     waehrung: "EUR",
     gueltigVon: "2024-03-01",
     version: 1,
