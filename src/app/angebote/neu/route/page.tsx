@@ -11,6 +11,8 @@ import {
   Input,
   SpinButton,
   Label,
+  Dropdown,
+  Option,
 } from "@fluentui/react-components";
 import { 
   ArrowLeftRegular, 
@@ -19,50 +21,6 @@ import {
   DocumentSaveRegular
 } from "@fluentui/react-icons";
 import { useWizard } from "@/contexts/WizardContext";
-
-// Einfache Dropdown-Komponente für Bahnhöfe
-function SimpleDropdown({ 
-  options, 
-  placeholder, 
-  value, 
-  onChange 
-}: { 
-  options: {value: string, label: string}[], 
-  placeholder: string, 
-  value: string, 
-  onChange: (value: string) => void 
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <div className="relative w-full">
-      <div 
-        className="border rounded p-2 cursor-pointer flex justify-between items-center"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span>{value ? options.find(opt => opt.value === value)?.label : placeholder}</span>
-        <span>{isOpen ? '▲' : '▼'}</span>
-      </div>
-      
-      {isOpen && (
-        <div className="absolute left-0 top-full w-full border rounded mt-1 bg-white z-10 max-h-60 overflow-y-auto">
-          {options.map(option => (
-            <div 
-              key={option.value}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function RouteAngebot() {
   const router = useRouter();
@@ -262,72 +220,79 @@ export default function RouteAngebot() {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Field label="Startbahnhof" required>
-                <SimpleDropdown 
-                  options={bahnhofOptions} 
-                  placeholder="Startbahnhof auswählen..." 
-                  value={startBahnhofValue} 
-                  onChange={setStartBahnhofValue}
-                />
+              <Field label="Startbahnhof *" className="mb-4">
+                <Dropdown
+                  value={startBahnhofValue ? bahnhofOptions.find(opt => opt.value === startBahnhofValue)?.label : undefined}
+                  placeholder="Startbahnhof auswählen..."
+                  onOptionSelect={(_, data) => {
+                    if (data.optionValue) {
+                      setStartBahnhofValue(data.optionValue);
+                    }
+                  }}
+                >
+                  {bahnhofOptions.map(option => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Dropdown>
               </Field>
               
-              <Field label="Zielbahnhof" className="mt-4" required>
-                <SimpleDropdown 
-                  options={bahnhofOptions} 
-                  placeholder="Zielbahnhof auswählen..." 
-                  value={zielBahnhofValue} 
-                  onChange={setZielBahnhofValue}
-                />
+              <Field label="Zielbahnhof *" className="mb-4">
+                <Dropdown
+                  value={zielBahnhofValue ? bahnhofOptions.find(opt => opt.value === zielBahnhofValue)?.label : undefined}
+                  placeholder="Zielbahnhof auswählen..."
+                  onOptionSelect={(_, data) => {
+                    if (data.optionValue) {
+                      setZielBahnhofValue(data.optionValue);
+                    }
+                  }}
+                >
+                  {bahnhofOptions.map(option => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Dropdown>
               </Field>
               
-              <Field label="Entfernung (km)" className="mt-4">
-                <Input readOnly value={startBahnhofValue && zielBahnhofValue ? "450" : ""} disabled />
+              <Field label="Entfernung (km)" className="mb-4">
+                <Input type="number" placeholder="Wird automatisch berechnet" disabled />
               </Field>
             </div>
             
             <div>
-              <Field label="Abfahrtsdatum" required>
+              <Field label="Abfahrtsdatum *" className="mb-4">
                 <Input 
                   type="date" 
                   value={abfahrtsdatum} 
-                  onChange={(e) => setAbfahrtsdatum(e.target.value)}
+                  onChange={(e) => setAbfahrtsdatum(e.target.value)} 
                 />
               </Field>
               
-              <Field label="Abfahrtszeit" className="mt-4">
+              <Field label="Abfahrtszeit" className="mb-4">
                 <Input 
                   type="time" 
                   value={abfahrtszeit} 
-                  onChange={(e) => setAbfahrtszeit(e.target.value)}
+                  onChange={(e) => setAbfahrtszeit(e.target.value)} 
                 />
               </Field>
               
-              <Field label="Fahrzeit (Stunden)" className="mt-4">
+              <Field label="Fahrzeit (Stunden)" className="mb-4">
                 <SpinButton 
-                  value={fahrzeit} 
-                  min={1} 
-                  max={72} 
-                  step={0.5}
-                  onChange={(e, data) => setFahrzeit(data?.value || 8)}
+                  value={fahrzeit}
+                  onChange={(_, data) => setFahrzeit(data.value || 0)}
+                  min={0}
+                  step={1}
                 />
               </Field>
-              
-              <Field label="Ankunftsdatum" className="mt-4">
-                <Input 
-                  type="date" 
-                  value={ankunftsdatum} 
-                  onChange={(e) => setAnkunftsdatum(e.target.value)}
-                  disabled={!!abfahrtsdatum && !!abfahrtszeit && !!fahrzeit}
-                />
+
+              <Field label="Ankunftsdatum" className="mb-4">
+                <Input type="date" value={ankunftsdatum} disabled />
               </Field>
-              
-              <Field label="Ankunftszeit" className="mt-4">
-                <Input 
-                  type="time" 
-                  value={ankunftszeit} 
-                  onChange={(e) => setAnkunftszeit(e.target.value)}
-                  disabled={!!abfahrtsdatum && !!abfahrtszeit && !!fahrzeit}
-                />
+
+              <Field label="Ankunftszeit" className="mb-4">
+                <Input type="time" value={ankunftszeit} disabled />
               </Field>
             </div>
           </div>
