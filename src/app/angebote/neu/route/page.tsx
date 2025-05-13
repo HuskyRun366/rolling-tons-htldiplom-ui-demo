@@ -217,102 +217,98 @@ export default function RouteAngebot() {
         
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Startbahnhof <span className="text-red-500">*</span>
-                </label>
-                <select
-                  className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
-                  value={startBahnhofValue}
-                  onChange={(e) => setStartBahnhofValue(e.target.value)}
-                >
-                  <option value="">Startbahnhof auswählen...</option>
-                  {bahnhofOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Zielbahnhof <span className="text-red-500">*</span>
-                </label>
-                <select
-                  className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
-                  value={zielBahnhofValue}
-                  onChange={(e) => setZielBahnhofValue(e.target.value)}
-                >
-                  <option value="">Zielbahnhof auswählen...</option>
-                  {bahnhofOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Entfernung (km)
-                </label>
-                <Input className="h-10 w-full" type="number" placeholder="Wird automatisch berechnet" disabled />
-              </div>
+            {/* Row 1: Startbahnhof (Left) | Zielbahnhof (Right) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Startbahnhof <span className="text-red-500">*</span>
+              </label>
+              <select
+                className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
+                value={startBahnhofValue}
+                onChange={(e) => setStartBahnhofValue(e.target.value)}
+              >
+                <option value="">Startbahnhof auswählen...</option>
+                {bahnhofOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Zielbahnhof <span className="text-red-500">*</span>
+              </label>
+              <select
+                className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
+                value={zielBahnhofValue}
+                onChange={(e) => setZielBahnhofValue(e.target.value)}
+              >
+                <option value="">Zielbahnhof auswählen...</option>
+                {bahnhofOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Row 2: Abfahrtsdatum (Left) | Abfahrtszeit (Right) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Abfahrtsdatum <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                className="h-10 w-full"
+                type="date" 
+                value={abfahrtsdatum} 
+                onChange={(e) => setAbfahrtsdatum(e.target.value)} 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Abfahrtszeit
+              </label>
+              <Input 
+                className="h-10 w-full"
+                type="time" 
+                value={abfahrtszeit} 
+                onChange={(e) => setAbfahrtszeit(e.target.value)} 
+              />
+            </div>
+
+            {/* Row 3: Ankunftsdatum (Left) | Ankunftszeit (Right) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ankunftsdatum
+              </label>
+              <Input className="h-10 w-full" type="date" value={ankunftsdatum} disabled />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ankunftszeit
+              </label>
+              <Input className="h-10 w-full" type="time" value={ankunftszeit} disabled />
             </div>
             
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Abfahrtsdatum <span className="text-red-500">*</span>
-                </label>
-                <Input 
-                  className="h-10 w-full"
-                  type="date" 
-                  value={abfahrtsdatum} 
-                  onChange={(e) => setAbfahrtsdatum(e.target.value)} 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Abfahrtszeit
-                </label>
-                <Input 
-                  className="h-10 w-full"
-                  type="time" 
-                  value={abfahrtszeit} 
-                  onChange={(e) => setAbfahrtszeit(e.target.value)} 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fahrzeit (Stunden)
-                </label>
-                <SpinButton 
-                  className="h-10 w-full"
-                  value={fahrzeit}
-                  onChange={(_, data) => setFahrzeit(data.value || 0)}
-                  min={0}
-                  step={1}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ankunftsdatum
-                </label>
-                <Input className="h-10 w-full" type="date" value={ankunftsdatum} disabled />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ankunftszeit
-                </label>
-                <Input className="h-10 w-full" type="time" value={ankunftszeit} disabled />
-              </div>
+            {/* Row 4: Fahrzeit (Left) | Entfernung (Right) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fahrzeit (Stunden)
+              </label>
+              <SpinButton 
+                className="h-10 w-full"
+                value={fahrzeit}
+                onChange={(_, data) => setFahrzeit(data.value || 0)}
+                min={0}
+                step={1}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Entfernung (km)
+              </label>
+              <Input className="h-10 w-full" type="number" placeholder="Wird automatisch berechnet" disabled />
             </div>
           </div>
           
