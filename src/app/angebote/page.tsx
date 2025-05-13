@@ -328,13 +328,13 @@ export default function Angebote() {
                       {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex space-x-2">
-                    <Link href={`/angebote/${angebot.id}`}>
-                      <Button icon={<DocumentSearch24Regular />} size="small">Details</Button>
+                  <TableCell className="flex items-center gap-2">
+                    <Link href={`/angebote/${angebot.id}`} passHref legacyBehavior>
+                      <Button icon={<DocumentSearch24Regular />} size="small" as="a">Details</Button>
                     </Link>
                     <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                    <Link href={`/angebote/${angebot.id}/bearbeiten`}>
-                      <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
+                    <Link href={`/angebote/${angebot.id}/bearbeiten`} passHref legacyBehavior>
+                      <Button icon={<EditRegular />} size="small" as="a">Bearbeiten</Button>
                     </Link>
                   </TableCell>
                 </TableRow>
