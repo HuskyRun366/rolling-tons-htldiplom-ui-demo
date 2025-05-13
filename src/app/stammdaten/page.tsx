@@ -158,6 +158,7 @@ export default function Stammdaten() {
                           <Button 
                             icon={<DeleteRegular />} 
                             size="medium"
+                            appearance="transparent"
                             onClick={() => {
                               setConfirmDeleteId(bahnhof.id);
                               setIsDeleteDialogOpen(true);
