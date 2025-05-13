@@ -138,11 +138,9 @@ export default function RouteAngebot() {
   }, [startBahnhofValue, zielBahnhofValue, abfahrtsdatum, abfahrtszeit, ankunftsdatum, ankunftszeit, updateRoute, bahnhofOptions]);
   
   // Aktualisiere den WizardContext, wenn sich die Routendaten ändern
-  /*
   useEffect(() => {
     updateContext();
   }, [updateContext]);
-  */
   
   // Berechne Ankunftszeit, wenn Abfahrtszeit und Fahrzeit eingegeben wurden
   useEffect(() => {
@@ -221,39 +219,33 @@ export default function RouteAngebot() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Field label="Startbahnhof *" className="mb-4">
-                <Dropdown
-                  value={startBahnhofValue ? bahnhofOptions.find(opt => opt.value === startBahnhofValue)?.label : undefined}
-                  placeholder="Startbahnhof auswählen..."
-                  onOptionSelect={(_, data) => {
-                    if (data.optionValue) {
-                      setStartBahnhofValue(data.optionValue);
-                    }
-                  }}
+                <select
+                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  value={startBahnhofValue}
+                  onChange={(e) => setStartBahnhofValue(e.target.value)}
                 >
+                  <option value="">Startbahnhof auswählen...</option>
                   {bahnhofOptions.map(option => (
-                    <Option key={option.value} value={option.value}>
+                    <option key={option.value} value={option.value}>
                       {option.label}
-                    </Option>
+                    </option>
                   ))}
-                </Dropdown>
+                </select>
               </Field>
               
               <Field label="Zielbahnhof *" className="mb-4">
-                <Dropdown
-                  value={zielBahnhofValue ? bahnhofOptions.find(opt => opt.value === zielBahnhofValue)?.label : undefined}
-                  placeholder="Zielbahnhof auswählen..."
-                  onOptionSelect={(_, data) => {
-                    if (data.optionValue) {
-                      setZielBahnhofValue(data.optionValue);
-                    }
-                  }}
+                <select
+                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  value={zielBahnhofValue}
+                  onChange={(e) => setZielBahnhofValue(e.target.value)}
                 >
+                  <option value="">Zielbahnhof auswählen...</option>
                   {bahnhofOptions.map(option => (
-                    <Option key={option.value} value={option.value}>
+                    <option key={option.value} value={option.value}>
                       {option.label}
-                    </Option>
+                    </option>
                   ))}
-                </Dropdown>
+                </select>
               </Field>
               
               <Field label="Entfernung (km)" className="mb-4">
