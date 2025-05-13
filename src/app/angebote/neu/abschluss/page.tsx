@@ -9,6 +9,7 @@ import {
   Field,
   Textarea,
   Checkbox,
+  Text
 } from "@fluentui/react-components";
 import { 
   ArrowLeftRegular, 
@@ -45,6 +46,14 @@ export default function AbschlussAngebot() {
     summe: `€${wizard.kalkulation.bruttosumme.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
     gültigBis: wizard.grunddaten.gueltigBis || "Nicht festgelegt"
   };
+  
+  // Aktuelles Datum für die Vorschau des "Erstellt am" Datums
+  const currentDate = new Date();
+  const erstelldatumForPreview = currentDate.toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
   
   // Navigation zum vorherigen Schritt
   const goToPreviousStep = () => {
@@ -85,8 +94,10 @@ export default function AbschlussAngebot() {
       
       // Keine sofortige Navigation - erst nach einiger Zeit
       setTimeout(() => {
-        console.log("Navigiere zu /angebote");
-        window.location.href = "/angebote"; // Direktes Umleiten statt Router
+        console.log("Navigiere zum neuen Angebot");
+        // Get the latest ID from the context to navigate directly to the newly created offer
+        const newAngebotId = angebotsDaten.nummer.toLowerCase().replace(/\s/g, '-');
+        window.location.href = `/angebote/${newAngebotId}`; // Navigate directly to the offer detail page
       }, 300);
     } catch (error) {
       console.error("Fehler beim Speichern:", error);
@@ -100,7 +111,12 @@ export default function AbschlussAngebot() {
         <div className="text-sm text-gray-500 mb-2">
           <span>Dashboard</span> &gt; <span>Angebote</span> &gt; <span>Neues Angebot</span> &gt; <span>Abschluss</span>
         </div>
-        <Title2>Angebot finalisieren</Title2>
+        <div className="flex flex-col">
+          <Title2>Angebot {angebotsDaten.nummer}</Title2>
+          <Text className="ml-1">
+            Erstellt am {erstelldatumForPreview} durch Bill Meixner
+          </Text>
+        </div>
       </div>
 
       <Card className="mb-6">
@@ -147,7 +163,6 @@ export default function AbschlussAngebot() {
               
               <Card className="p-4 border bg-gray-50">
                 <div className="text-right mb-4">
-                  <div className="text-xl font-bold">{angebotsDaten.nummer}</div>
                   <div className="text-gray-600">Gültig bis: {angebotsDaten.gültigBis}</div>
                 </div>
                 

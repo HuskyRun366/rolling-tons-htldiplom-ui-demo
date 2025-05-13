@@ -95,8 +95,9 @@ const useStyles = makeStyles({
   statusCard: {
     flex: '1 1 0',
     display: 'flex',
-    alignItems: 'center',
-    padding: tokens.spacingVerticalM,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: tokens.spacingVerticalL,
   }
 });
 
@@ -117,6 +118,40 @@ function calculateDaysRemaining(dateString: string) {
   
   return diffDays > 0 ? diffDays : 0;
 }
+
+// Helper function to format currency robustly
+const formatCurrencySmart = (value: any): string => {
+  if (value === null || typeof value === 'undefined' || String(value).trim() === '') {
+    return 'N/A';
+  }
+  
+  let strValue = String(value);
+  
+  // Attempt 1: If it's already a number, format it.
+  if (typeof value === 'number' && !isNaN(value)) {
+    return value.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, '');
+  }
+  
+  // Attempt 2: Try to parse it after cleaning typical currency/locale specific things for German numbers
+  let numericStr = strValue.replace(/[€\s]/g, ''); // Remove € and spaces
+  numericStr = numericStr.replace(/\./g, '');       // Remove thousand dots (e.g., 1.234 -> 1234)
+  numericStr = numericStr.replace(/,/g, '.');       // Convert decimal comma to dot (e.g., 1234,56 -> 1234.56)
+  
+  let num = parseFloat(numericStr);
+  
+  if (!isNaN(num)) {
+    return num.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, '');
+  }
+  
+  // Attempt 3: Maybe it's a simple number string already (e.g. "1234.56" or "1234")
+  // This will also catch cases where original was "123,45" and became "123.45" in numericStr
+  num = parseFloat(strValue.replace(/,/g, '.')); // Only replace comma for this attempt, keep original dots
+   if (!isNaN(num)) {
+    return num.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, '');
+  }
+
+  return strValue; // If all parsing fails, return the original string value as a last resort instead of 'N/A' for already formatted strings.
+};
 
 export default function AngebotDetails() {
   const styles = useStyles();
@@ -204,7 +239,7 @@ export default function AngebotDetails() {
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <div>
+        <div className="flex flex-col">
           <Title2>Angebot {angebot.nummer}</Title2>
           <Text className="ml-1">Erstellt am {angebot.erstelldatum} durch Bill Meixner</Text>
         </div>
@@ -223,54 +258,55 @@ export default function AngebotDetails() {
 
       <div className={styles.statusCards}>
         <Card className={styles.statusCard}>
-          <Badge color={getStatusBadgeColor(angebot.status) as any} size="large" className="mr-2">
-            {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
-          </Badge>
-          <div className="flex items-center">
-            <Text weight="semibold" className="mr-2">Status</Text>
-            <select 
-              value={angebot.status} 
-              onChange={(e) => {
-                const newStatus = e.target.value as 'offen' | 'angenommen' | 'abgelehnt' | 'storniert';
-                console.log(`Changing status from ${angebot.status} to ${newStatus}`);
-                updateAngebot(angebot.id, { status: newStatus });
-                setAngebot({ ...angebot, status: newStatus });
-              }}
-              className="block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="offen">Offen</option>
-              <option value="angenommen">Angenommen</option>
-              <option value="abgelehnt">Abgelehnt</option>
-              <option value="storniert">Storniert</option>
-            </select>
+          <div className="flex mb-4">
+            <Badge color={getStatusBadgeColor(angebot.status) as any} size="large">
+              {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
+            </Badge>
           </div>
+          <Text weight="bold" className="mb-1">Status</Text>
+          <select 
+            value={angebot.status} 
+            onChange={(e) => {
+              const newStatus = e.target.value as 'offen' | 'angenommen' | 'abgelehnt' | 'storniert';
+              console.log(`Changing status from ${angebot.status} to ${newStatus}`);
+              updateAngebot(angebot.id, { status: newStatus });
+              setAngebot({ ...angebot, status: newStatus });
+            }}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="offen">Offen</option>
+            <option value="angenommen">Angenommen</option>
+            <option value="abgelehnt">Abgelehnt</option>
+            <option value="storniert">Storniert</option>
+          </select>
         </Card>
         
         <Card className={styles.statusCard}>
-          <HistoryRegular className="mr-2 text-blue-600 text-2xl" />
-          <div className="flex items-baseline">
-            <Text weight="semibold" className="mr-2">Gültig bis</Text>
-            <Text>
-              {angebot.gueltigBis || 'Nicht festgelegt'}
-              {daysRemaining !== null && ` (noch ${daysRemaining} Tage)`}
-            </Text>
+          <div className="flex mb-4">
+            <HistoryRegular className="text-blue-600 text-2xl" />
           </div>
+          <Text weight="bold" className="mb-2">Gültig bis</Text>
+          <Text>
+            {angebot.gueltigBis}{daysRemaining !== null && ` (noch ${daysRemaining} Tage)`}
+          </Text>
         </Card>
         
         <Card className={styles.statusCard}>
-          <MoneyRegular className="mr-2 text-green-600 text-2xl" />
-          <div className="flex items-baseline">
-            <Text weight="semibold" className="mr-2">Gesamtsumme</Text>
-            <Text size={500}>{angebot.summe}</Text>
+          <div className="flex mb-4">
+            <MoneyRegular className="text-green-600 text-2xl" />
           </div>
+          <Text weight="bold" className="mb-2">Gesamtsumme</Text>
+          <Text size={500}>
+            {formatCurrencySmart(angebot.summe)}
+          </Text>
         </Card>
         
         <Card className={styles.statusCard}>
-          <CopyRegular className="mr-2 text-purple-600 text-2xl" />
-          <div>
-            <Text weight="semibold">Version</Text>
-            <Text>1.0 (Original)</Text>
+          <div className="flex mb-4">
+            <CopyRegular className="text-purple-600 text-2xl" />
           </div>
+          <Text weight="bold" className="mb-2">Version</Text>
+          <Text>1.0 (Original)</Text>
         </Card>
       </div>
       
