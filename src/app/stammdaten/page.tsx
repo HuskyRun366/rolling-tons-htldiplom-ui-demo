@@ -468,8 +468,16 @@ export default function Stammdaten() {
                         <TableCell>{lieferant.name}</TableCell>
                         <TableCell>{lieferant.typ}</TableCell>
                         <TableCell>{lieferant.kontaktperson}</TableCell>
-                        <TableCell>{lieferant.email}</TableCell>
-                        <TableCell>{lieferant.telefon}</TableCell>
+                        <TableCell>
+                          <div style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lieferant.email}>
+                            {lieferant.email}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div style={{ maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lieferant.telefon}>
+                            {lieferant.telefon}
+                          </div>
+                        </TableCell>
                         <TableCell>{lieferant.ort}</TableCell>
                         <TableCell>{lieferant.land}</TableCell>
                         <TableCell>
@@ -548,7 +556,11 @@ export default function Stammdaten() {
                         <TableCell>{kondition.wert}{kondition.istProzent ? '%' : ' EUR'}</TableCell>
                         <TableCell>{new Date(kondition.gueltigVon).toLocaleDateString()}</TableCell>
                         <TableCell>{kondition.gueltigBis ? new Date(kondition.gueltigBis).toLocaleDateString() : '-'}</TableCell>
-                        <TableCell>{kondition.beschreibung || '-'}</TableCell>
+                        <TableCell>
+                          <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={kondition.beschreibung || undefined}>
+                            {kondition.beschreibung || '-'}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <Badge color={kondition.status === 'aktiv' ? 'success' : 'warning'}>
                             {kondition.status.charAt(0).toUpperCase() + kondition.status.slice(1)}
