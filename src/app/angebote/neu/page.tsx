@@ -209,21 +209,33 @@ export default function NeuesAngebot() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Field label="Kunde auswählen" required>
-                <SimpleDropdown 
-                  options={customerOptions} 
-                  placeholder="Kunden suchen..." 
-                  value={selectedCustomer} 
-                  onChange={setSelectedCustomer}
-                />
+                <select
+                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  value={selectedCustomer}
+                  onChange={(e) => setSelectedCustomer(e.target.value)}
+                >
+                  <option value="">Kunden suchen...</option>
+                  {customerOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </Field>
               
               <Field label="Ansprechpartner" className="mt-4">
-                <SimpleDropdown 
-                  options={contactOptions} 
-                  placeholder="Ansprechpartner auswählen" 
-                  value={selectedContact} 
-                  onChange={setSelectedContact}
-                />
+                <select
+                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  value={selectedContact}
+                  onChange={(e) => setSelectedContact(e.target.value)}
+                >
+                  <option value="">Ansprechpartner auswählen</option>
+                  {contactOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </Field>
               
               <Field label="Angebotsnr." className="mt-4">
@@ -285,12 +297,21 @@ export default function NeuesAngebot() {
                     />
                   </div>
                   <div className="w-1/2">
-                    <SimpleDropdown 
-                      options={unitOptions} 
-                      placeholder="Einheit wählen" 
-                      value={selectedUnit} 
-                      onChange={setSelectedUnit}
-                    />
+                    <div className="mb-1">
+                      <Label>Einheit</Label>
+                    </div>
+                    <select
+                      className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                      value={selectedUnit}
+                      onChange={(e) => setSelectedUnit(e.target.value)}
+                    >
+                      <option value="">Einheit wählen</option>
+                      {unitOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </Field>
