@@ -318,7 +318,7 @@ export default function NeuesAngebot() {
                 Projektbezeichnung / Referenz
               </label>
               <Input 
-                className="h-10 w-full mt-4"
+                className="h-10 w-full"
                 placeholder="Optional" 
                 value={projekt} 
                 onChange={(e) => setProjekt(e.target.value)} 
@@ -329,20 +329,22 @@ export default function NeuesAngebot() {
               <label className="block text-sm font-medium text-gray-700">
                 Gültigkeitsdauer
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="gueltigkeit-von" className="text-sm font-medium text-gray-700">Von</label>
                   <Input 
-                    className="h-10 w-full"
+                    id="gueltigkeit-von"
+                    className="h-10 flex-grow min-w-0"
                     type="date" 
                     disabled 
                     value={new Date().toISOString().split('T')[0]} 
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
-                  <Input 
-                    className="h-10 w-full"
+                <div className="flex items-center gap-2">
+                  <label htmlFor="gueltigkeit-bis" className="text-sm font-medium text-gray-700">Bis</label>
+                  <Input
+                    id="gueltigkeit-bis"
+                    className="h-10 flex-grow min-w-0"
                     type="date" 
                     value={gueltigBis} 
                     onChange={(e) => setGueltigBis(e.target.value)}
