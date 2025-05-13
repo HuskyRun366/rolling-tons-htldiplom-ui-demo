@@ -168,56 +168,58 @@ export default function KundenPage() {
                 <TableRow key={kunde.id}>
                   <TableCell>{kunde.name}</TableCell>
                   <TableCell>{kunde.ansprechpartner.join(", ")}</TableCell>
-                  <TableCell className="flex items-center gap-2">
-                    <Link href={`/kunden/${kunde.id}`} passHref legacyBehavior>
-                      <Button
-                        icon={<DocumentSearch24Regular />}
-                        size="small"
-                        as="a"
-                      >
-                        Details
-                      </Button>
-                    </Link>
-                    <Link href={`/kunden/${kunde.id}/bearbeiten`} passHref legacyBehavior>
-                      <Button icon={<EditRegular />} size="small" as="a">
-                        Bearbeiten
-                      </Button>
-                    </Link>
-                    <Dialog
-                      open={!!kundeToDelete && kundeToDelete.id === kunde.id}
-                      onOpenChange={(_, data) => {
-                        if (!data.open) setKundeToDelete(null);
-                      }}
-                    >
-                      <DialogTrigger disableButtonEnhancement>
+                  <TableCell>
+                    <div className="flex" style={{ columnGap: '20px' }}>
+                      <Link href={`/kunden/${kunde.id}`} passHref legacyBehavior>
                         <Button
-                          icon={<DeleteRegular />}
-                          size="small"
-                          appearance="subtle"
-                          onClick={() => setKundeToDelete(kunde)}
+                          icon={<DocumentSearch24Regular />}
+                          size="medium"
+                          as="a"
                         >
-                          Löschen
+                          Details
                         </Button>
-                      </DialogTrigger>
-                      <DialogSurface>
-                        <DialogBody>
-                          <DialogTitle>Kunde löschen</DialogTitle>
-                          <DialogContent>
-                            <FluentText>
-                              Sind Sie sicher, dass Sie den Kunden \\"{kundeToDelete?.name}\\" unwiderruflich löschen möchten?
-                            </FluentText>
-                          </DialogContent>
-                          <DialogActions>
-                            <DialogTrigger disableButtonEnhancement>
-                              <Button appearance="secondary">Abbrechen</Button>
-                            </DialogTrigger>
-                            <Button appearance="primary" onClick={handleDeleteConfirm}>
-                              Löschen
-                            </Button>
-                          </DialogActions>
-                        </DialogBody>
-                      </DialogSurface>
-                    </Dialog>
+                      </Link>
+                      <Link href={`/kunden/${kunde.id}/bearbeiten`} passHref legacyBehavior>
+                        <Button icon={<EditRegular />} size="medium" as="a">
+                          Bearbeiten
+                        </Button>
+                      </Link>
+                      <Dialog
+                        open={!!kundeToDelete && kundeToDelete.id === kunde.id}
+                        onOpenChange={(_, data) => {
+                          if (!data.open) setKundeToDelete(null);
+                        }}
+                      >
+                        <DialogTrigger disableButtonEnhancement>
+                          <Button
+                            icon={<DeleteRegular />}
+                            size="medium"
+                            appearance="subtle"
+                            onClick={() => setKundeToDelete(kunde)}
+                          >
+                            Löschen
+                          </Button>
+                        </DialogTrigger>
+                        <DialogSurface>
+                          <DialogBody>
+                            <DialogTitle>Kunde löschen</DialogTitle>
+                            <DialogContent>
+                              <FluentText>
+                                Sind Sie sicher, dass Sie den Kunden \\"{kundeToDelete?.name}\\" unwiderruflich löschen möchten?
+                              </FluentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <DialogTrigger disableButtonEnhancement>
+                                <Button appearance="secondary">Abbrechen</Button>
+                              </DialogTrigger>
+                              <Button appearance="primary" onClick={handleDeleteConfirm}>
+                                Löschen
+                              </Button>
+                            </DialogActions>
+                          </DialogBody>
+                        </DialogSurface>
+                      </Dialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
