@@ -331,7 +331,7 @@ export default function NeuesAngebot() {
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-small text-gray-700 mb-1">Von</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
                   <Input 
                     className="h-10 w-full"
                     type="date" 
@@ -340,7 +340,7 @@ export default function NeuesAngebot() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-small text-gray-700 mb-1">Bis</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
                   <Input 
                     className="h-10 w-full"
                     type="date" 
