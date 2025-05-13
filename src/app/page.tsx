@@ -61,7 +61,7 @@ export default function Dashboard() {
   const regionSuccess = [
     { region: "Region A", rate: 75, color: "#4CAF50" },
     { region: "Region B", rate: 60, color: "#2196F3" },
-    { region: "Region C", rate: 85, color: "#9C27B0" },
+    { region: "Region C", rate: 85, color: "#4CAF50" },
     { region: "Region D", rate: 45, color: "#FF9800" }
   ];
 
