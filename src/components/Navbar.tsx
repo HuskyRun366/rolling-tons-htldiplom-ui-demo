@@ -92,7 +92,11 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  userDetailsTextContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
 });
 
 const navLinks = [
@@ -142,7 +146,7 @@ export default function Navbar() {
         <div className={styles.userIcon}>
           <PersonRegular />
         </div>
-        <div>
+        <div className={styles.userDetailsTextContainer}>
           <Text weight="semibold">Bill Meixner</Text>
           <Text size={200}>Vertriebsmitarbeiter</Text>
         </div>
