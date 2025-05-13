@@ -206,146 +206,186 @@ export default function NeuesAngebot() {
         </div>
         
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Field label="Kunde auswählen" required>
-                <select
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  value={selectedCustomer}
-                  onChange={(e) => setSelectedCustomer(e.target.value)}
-                >
-                  <option value="">Kunden suchen...</option>
-                  {customerOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              
-              <Field label="Ansprechpartner" className="mt-4">
-                <select
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                  value={selectedContact}
-                  onChange={(e) => setSelectedContact(e.target.value)}
-                >
-                  <option value="">Ansprechpartner auswählen</option>
-                  {contactOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              
-              <Field label="Angebotsnr." className="mt-4">
-                <Input readOnly value={wizard.angebotsnummer} disabled />
-              </Field>
-              
-              <Field label="Gültigkeitsdauer" className="mt-4">
-                <div className="flex space-x-4">
-                  <div className="w-1/2 pr-4">
-                    <Label className="mb-2">Von</Label>
-                    <div className="mt-1">
-                      <Input type="date" disabled value={new Date().toISOString().split('T')[0]} />
-                    </div>
-                  </div>
-                  <div className="w-1/2">
-                    <Label className="mb-2">Bis</Label>
-                    <div className="mt-1">
-                      <SimpleDateInput 
-                        placeholder="Datum wählen" 
-                        value={gueltigBis} 
-                        onChange={setGueltigBis}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Field>
-              
-              <Field label="Projektbezeichnung / Referenz" className="mt-4">
-                <Input placeholder="Optional" value={projekt} onChange={(e) => setProjekt(e.target.value)} />
-              </Field>
-              
-              <Field label="Vertragsart" className="mt-4">
-                <RadioGroup value={vertragsart} onChange={(_,data) => setVertragsart(data.value)} layout="horizontal">
-                  <Radio value="Einzelvertrag" label="Einzelvertrag" />
-                  <Radio value="Rahmenvertrag" label="Rahmenvertrag" />
-                  <Radio value="Sondervereinbarung" label="Sondervereinbarung" />
-                </RadioGroup>
-              </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kunde auswählen <span className="text-red-500">*</span>
+              </label>
+              <select
+                className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
+                value={selectedCustomer}
+                onChange={(e) => setSelectedCustomer(e.target.value)}
+              >
+                <option value="">Kunden suchen...</option>
+                {customerOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             
-            <div>
-              <Field label="Transportgut" required>
-                <Input 
-                  placeholder="Beschreibung des Transportgutes" 
-                  value={transportgut}
-                  onChange={(e) => setTransportgut(e.target.value)}
-                />
-              </Field>
-              
-              <Field label="Gewicht/Menge" required className="mt-4">
-                <div className="flex space-x-4">
-                  <div className="w-1/2">
-                    <Input
-                      type="number"
-                      value={menge}
-                      onChange={(e) => setMenge(e.target.value)}
-                      min={0}
-                      step={0.5}
-                    />
-                  </div>
-                  <div className="w-1/2">
-                    <div className="mb-1">
-                      <Label>Einheit</Label>
-                    </div>
-                    <select
-                      className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
-                      value={selectedUnit}
-                      onChange={(e) => setSelectedUnit(e.target.value)}
-                    >
-                      <option value="">Einheit wählen</option>
-                      {unitOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ansprechpartner
+              </label>
+              <select
+                className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
+                value={selectedContact}
+                onChange={(e) => setSelectedContact(e.target.value)}
+              >
+                <option value="">Ansprechpartner auswählen</option>
+                {contactOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Transportgut <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                className="h-10 w-full"
+                placeholder="Beschreibung des Transportgutes" 
+                value={transportgut}
+                onChange={(e) => setTransportgut(e.target.value)}
+              />
+            </div>
+            
+            <div className="mb-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gewicht/Menge <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    className="h-10 w-full"
+                    type="number"
+                    value={menge}
+                    onChange={(e) => setMenge(e.target.value)}
+                    min={0}
+                    step={0.5}
+                  />
                 </div>
-              </Field>
-              
-              <Field label="Bemerkungen/Hinweise" className="mt-4">
-                <Textarea 
-                  placeholder="Interne Bemerkungen zum Angebot" 
-                  value={bemerkungen}
-                  onChange={(e) => setBemerkungen(e.target.value)}
-                />
-              </Field>
-              
-              <div className="mt-4">
-                <Field>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Einheit
+                  </label>
+                  <select
+                    className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
+                    value={selectedUnit}
+                    onChange={(e) => setSelectedUnit(e.target.value)}
+                  >
+                    <option value="">Einheit wählen</option>
+                    {unitOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Angebotsnr.
+              </label>
+              <Input 
+                className="h-10 w-full"
+                readOnly 
+                value={wizard.angebotsnummer} 
+                disabled 
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vertragsart
+              </label>
+              <RadioGroup value={vertragsart} onChange={(_,data) => setVertragsart(data.value)} layout="horizontal" className="mt-2">
+                <Radio value="Einzelvertrag" label="Einzelvertrag" />
+                <Radio value="Rahmenvertrag" label="Rahmenvertrag" />
+                <Radio value="Sondervereinbarung" label="Sondervereinbarung" />
+              </RadioGroup>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Projektbezeichnung / Referenz
+              </label>
+              <Input 
+                className="h-10 w-full mt-6"
+                placeholder="Optional" 
+                value={projekt} 
+                onChange={(e) => setProjekt(e.target.value)} 
+              />
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Gültigkeitsdauer
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
+                  <Input 
+                    className="h-10 w-full"
+                    type="date" 
+                    disabled 
+                    value={new Date().toISOString().split('T')[0]} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+                  <Input 
+                    className="h-10 w-full"
+                    type="date" 
+                    value={gueltigBis} 
+                    onChange={(e) => setGueltigBis(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bemerkungen/Hinweise
+              </label>
+              <Textarea 
+                placeholder="Interne Bemerkungen zum Angebot" 
+                value={bemerkungen}
+                onChange={(e) => setBemerkungen(e.target.value)}
+                className="min-h-[120px] w-full"
+              />
+            </div>
+
+            <div className="mb-6">
+              <div className="pt-7 space-y-2">
+                <div>
                   <Checkbox 
                     label="Leerfahrt in Kalkulation berücksichtigen" 
                     checked={leerfahrt}
                     onChange={(e, data) => setLeerfahrt(!!data.checked)}
                   />
-                </Field>
-                <Field>
+                </div>
+                <div>
                   <Checkbox 
                     label="Rückfahrt anbieten" 
                     checked={rueckfahrt}
                     onChange={(e, data) => setRueckfahrt(!!data.checked)}
                   />
-                </Field>
-                <Field>
+                </div>
+                <div>
                   <Checkbox 
                     label="Expresszuschlag" 
                     checked={express}
                     onChange={(e, data) => setExpress(!!data.checked)}
                   />
-                </Field>
+                </div>
               </div>
             </div>
           </div>
