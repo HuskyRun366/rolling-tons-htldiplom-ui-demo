@@ -216,11 +216,14 @@ export default function RouteAngebot() {
         </div>
         
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Field label="Startbahnhof *" className="mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Startbahnhof <span className="text-red-500">*</span>
+                </label>
                 <select
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
                   value={startBahnhofValue}
                   onChange={(e) => setStartBahnhofValue(e.target.value)}
                 >
@@ -231,11 +234,14 @@ export default function RouteAngebot() {
                     </option>
                   ))}
                 </select>
-              </Field>
+              </div>
               
-              <Field label="Zielbahnhof *" className="mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Zielbahnhof <span className="text-red-500">*</span>
+                </label>
                 <select
-                  className="w-full border rounded p-2 focus:outline-none focus:border-blue-500"
+                  className="w-full border rounded p-2 h-10 focus:outline-none focus:border-blue-500"
                   value={zielBahnhofValue}
                   onChange={(e) => setZielBahnhofValue(e.target.value)}
                 >
@@ -246,46 +252,67 @@ export default function RouteAngebot() {
                     </option>
                   ))}
                 </select>
-              </Field>
+              </div>
               
-              <Field label="Entfernung (km)" className="mb-4">
-                <Input type="number" placeholder="Wird automatisch berechnet" disabled />
-              </Field>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Entfernung (km)
+                </label>
+                <Input className="h-10 w-full" type="number" placeholder="Wird automatisch berechnet" disabled />
+              </div>
             </div>
             
-            <div>
-              <Field label="Abfahrtsdatum *" className="mb-4">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Abfahrtsdatum <span className="text-red-500">*</span>
+                </label>
                 <Input 
+                  className="h-10 w-full"
                   type="date" 
                   value={abfahrtsdatum} 
                   onChange={(e) => setAbfahrtsdatum(e.target.value)} 
                 />
-              </Field>
+              </div>
               
-              <Field label="Abfahrtszeit" className="mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Abfahrtszeit
+                </label>
                 <Input 
+                  className="h-10 w-full"
                   type="time" 
                   value={abfahrtszeit} 
                   onChange={(e) => setAbfahrtszeit(e.target.value)} 
                 />
-              </Field>
+              </div>
               
-              <Field label="Fahrzeit (Stunden)" className="mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fahrzeit (Stunden)
+                </label>
                 <SpinButton 
+                  className="h-10 w-full"
                   value={fahrzeit}
                   onChange={(_, data) => setFahrzeit(data.value || 0)}
                   min={0}
                   step={1}
                 />
-              </Field>
+              </div>
 
-              <Field label="Ankunftsdatum" className="mb-4">
-                <Input type="date" value={ankunftsdatum} disabled />
-              </Field>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ankunftsdatum
+                </label>
+                <Input className="h-10 w-full" type="date" value={ankunftsdatum} disabled />
+              </div>
 
-              <Field label="Ankunftszeit" className="mb-4">
-                <Input type="time" value={ankunftszeit} disabled />
-              </Field>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ankunftszeit
+                </label>
+                <Input className="h-10 w-full" type="time" value={ankunftszeit} disabled />
+              </div>
             </div>
           </div>
           
