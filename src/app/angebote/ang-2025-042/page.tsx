@@ -338,10 +338,10 @@ export default function AngebotDetails() {
               </div>
               
               <div className="mt-8">
-                <Title3 className="mb-4">Route</Title3>
-                <div className="flex items-center justify-between w-full">
-                  <div className="text-right flex-1">
-                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
+                <Title3 className="mb-6">Route</Title3>
+                <div className="flex items-center justify-between w-full px-4">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-3">
                       <Text size={400}>AT</Text>
                     </div>
                     <div>
@@ -350,16 +350,16 @@ export default function AngebotDetails() {
                     </div>
                   </div>
                   
-                  <div className="flex-1 max-w-60 mx-4 text-center">
+                  <div className="flex-1 mx-6">
                     <div className="h-0.5 bg-gray-200 relative w-full">
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 whitespace-nowrap">
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-3 whitespace-nowrap">
                         <Text>920 km</Text>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="text-left flex-1">
-                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-3">
                       <Text size={400}>DE</Text>
                     </div>
                     <div>
