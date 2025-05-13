@@ -41,12 +41,19 @@ import {
   SearchRegular
 } from "@fluentui/react-icons";
 import { useBahnhoefe } from "@/contexts/BahnhofContext";
+import { useKostenkomponenten, Kostenkomponente } from "@/contexts/KostenkomponenteContext";
 
 export default function Stammdaten() {
   const { bahnhoefe, deleteBahnhof } = useBahnhoefe();
+  const { 
+    kostenkomponenten, 
+    deleteKostenkomponente 
+  } = useKostenkomponenten();
+
   const [selectedTab, setSelectedTab] = useState<TabValue>("bahnhoefe");
   const [searchTerm, setSearchTerm] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [entityToDelete, setEntityToDelete] = useState<'bahnhof' | 'kostenkomponente' | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Filter bahnhoefe based on search term
@@ -59,16 +66,46 @@ export default function Stammdaten() {
     );
   });
 
+  // Filter kostenkomponenten based on search term
+  const filteredKostenkomponenten = kostenkomponenten.filter(kk => {
+    return (
+      kk.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kk.typ.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kk.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kk.betrag.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (kk.beschreibung && kk.beschreibung.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  });
+
   // Handle tab change
   const handleTabChange = (tab: TabValue) => {
     setSelectedTab(tab);
+    setSearchTerm(""); // Reset search term when tab changes
   };
 
-  // Handle delete confirmation
+  // Handle delete confirmation for Bahnhof
+  const handleDeleteBahnhof = (id: string) => {
+    setConfirmDeleteId(id);
+    setEntityToDelete("bahnhof");
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Handle delete confirmation for Kostenkomponente
+  const handleDeleteKostenkomponente = (id: string) => {
+    setConfirmDeleteId(id);
+    setEntityToDelete("kostenkomponente");
+    setIsDeleteDialogOpen(true);
+  };
+
   const handleDeleteConfirm = () => {
     if (confirmDeleteId) {
-      deleteBahnhof(confirmDeleteId);
+      if (entityToDelete === 'bahnhof') {
+        deleteBahnhof(confirmDeleteId);
+      } else if (entityToDelete === 'kostenkomponente') {
+        deleteKostenkomponente(confirmDeleteId);
+      }
       setConfirmDeleteId(null);
+      setEntityToDelete(null);
       setIsDeleteDialogOpen(false);
     }
   };
@@ -159,10 +196,7 @@ export default function Stammdaten() {
                             icon={<DeleteRegular />} 
                             size="medium"
                             appearance="transparent"
-                            onClick={() => {
-                              setConfirmDeleteId(bahnhof.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
+                            onClick={() => handleDeleteBahnhof(bahnhof.id)}
                           >
                             Löschen
                           </Button>
@@ -276,7 +310,82 @@ export default function Stammdaten() {
           )}
           
           {selectedTab === "kostenkomponenten" && (
-            <div>Kostenkomponenten-Inhalt (noch nicht implementiert)</div>
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2">
+                  <Text weight="semibold" size={400}>Kostenkomponenten</Text>
+                  <div className="relative">
+                    <Input 
+                      placeholder="Suchen..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      contentBefore={<SearchRegular />}
+                      className="w-64"
+                    />
+                  </div>
+                </div>
+                <Link href="/stammdaten/kostenkomponenten/neu">
+                  <Button appearance="primary" icon={<AddRegular />}>Komponente hinzufügen</Button>
+                </Link>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Name</TableHeaderCell>
+                    <TableHeaderCell>Typ</TableHeaderCell>
+                    <TableHeaderCell>Betrag</TableHeaderCell>
+                    <TableHeaderCell>Einheit</TableHeaderCell>
+                    <TableHeaderCell>Währung</TableHeaderCell>
+                    <TableHeaderCell>Gültig Von</TableHeaderCell>
+                    <TableHeaderCell>Gültig Bis</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell>Aktionen</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredKostenkomponenten.length > 0 ? (
+                    filteredKostenkomponenten.map((kk) => (
+                      <TableRow key={kk.id}>
+                        <TableCell>{kk.name}</TableCell>
+                        <TableCell>{kk.typ}</TableCell>
+                        <TableCell>{kk.betrag.toFixed(2)}</TableCell>
+                        <TableCell>{kk.einheit}</TableCell>
+                        <TableCell>{kk.waehrung}</TableCell>
+                        <TableCell>{new Date(kk.gueltigVon).toLocaleDateString()}</TableCell>
+                        <TableCell>{kk.gueltigBis ? new Date(kk.gueltigBis).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>
+                          <Badge color={kk.status === 'aktiv' ? 'success' : 'warning'}>
+                            {kk.status.charAt(0).toUpperCase() + kk.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Link href={`/stammdaten/kostenkomponenten/${kk.id}`}>
+                              <Button icon={<EditRegular />} size="medium">Bearbeiten</Button>
+                            </Link>
+                            <Button 
+                              icon={<DeleteRegular />} 
+                              size="medium"
+                              appearance="transparent"
+                              onClick={() => handleDeleteKostenkomponente(kk.id)}
+                            >
+                              Löschen
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={9} style={{ textAlign: "center", padding: "20px" }}>
+                        Keine Kostenkomponenten gefunden oder passend zum Suchbegriff.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </>
           )}
           
           {selectedTab === "lieferanten" && (
@@ -293,9 +402,12 @@ export default function Stammdaten() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={(e, data) => setIsDeleteDialogOpen(data.open)}>
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Bahnhof löschen</DialogTitle>
+            <DialogTitle>
+              {entityToDelete === 'bahnhof' && "Bahnhof löschen"}
+              {entityToDelete === 'kostenkomponente' && "Kostenkomponente löschen"}
+            </DialogTitle>
             <DialogContent>
-              Sind Sie sicher, dass Sie diesen Bahnhof löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogContent>
             <DialogActions>
               <Button appearance="secondary" onClick={() => setIsDeleteDialogOpen(false)}>Abbrechen</Button>
