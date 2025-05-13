@@ -24,7 +24,9 @@ import {
   TableRow,
   TableHeaderCell,
   TableBody,
-  TableCell
+  TableCell,
+  SelectionEvents, 
+  OptionOnSelectData
 } from "@fluentui/react-components";
 import { 
   ArrowLeftRegular,
@@ -119,7 +121,7 @@ function calculateDaysRemaining(dateString: string) {
 export default function AngebotDetails() {
   const styles = useStyles();
   const params = useParams();
-  const { getAngebotById } = useAngebote();
+  const { getAngebotById, updateAngebot } = useAngebote();
   const [angebot, setAngebot] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -139,6 +141,19 @@ export default function AngebotDetails() {
       case 'abgelehnt': return 'danger';
       case 'storniert': return 'informative';
       default: return 'subtle';
+    }
+  };
+  
+  // Status ändern
+  const handleStatusChange = (event: SelectionEvents, data: OptionOnSelectData) => {
+    if (data.optionValue && angebot) {
+      // Cast to status type as we know these are valid status values
+      const newStatus = data.optionValue as 'offen' | 'angenommen' | 'abgelehnt' | 'storniert';
+      console.log(`Changing status from ${angebot.status} to ${newStatus}`);
+      
+      // Update in context and refresh local state
+      updateAngebot(angebot.id, { status: newStatus });
+      setAngebot({ ...angebot, status: newStatus });
     }
   };
   
@@ -211,14 +226,23 @@ export default function AngebotDetails() {
           <Badge color={getStatusBadgeColor(angebot.status) as any} size="large" className="mr-2">
             {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
           </Badge>
-          <div>
-            <Text weight="semibold">Status</Text>
-            <Dropdown>
-              <Option value="offen">Offen</Option>
-              <Option value="angenommen">Angenommen</Option>
-              <Option value="abgelehnt">Abgelehnt</Option>
-              <Option value="storniert">Storniert</Option>
-            </Dropdown>
+          <div className="flex items-center">
+            <Text weight="semibold" className="mr-2">Status</Text>
+            <select 
+              value={angebot.status} 
+              onChange={(e) => {
+                const newStatus = e.target.value as 'offen' | 'angenommen' | 'abgelehnt' | 'storniert';
+                console.log(`Changing status from ${angebot.status} to ${newStatus}`);
+                updateAngebot(angebot.id, { status: newStatus });
+                setAngebot({ ...angebot, status: newStatus });
+              }}
+              className="block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="offen">Offen</option>
+              <option value="angenommen">Angenommen</option>
+              <option value="abgelehnt">Abgelehnt</option>
+              <option value="storniert">Storniert</option>
+            </select>
           </div>
         </Card>
         
