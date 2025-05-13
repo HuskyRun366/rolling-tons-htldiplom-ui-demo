@@ -73,6 +73,8 @@ export default function Stammdaten() {
       kk.typ.toLowerCase().includes(searchTerm.toLowerCase()) ||
       kk.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
       kk.betrag.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kk.einheit.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kk.waehrung.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (kk.beschreibung && kk.beschreibung.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });

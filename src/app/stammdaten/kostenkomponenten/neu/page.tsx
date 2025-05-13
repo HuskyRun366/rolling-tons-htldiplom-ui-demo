@@ -46,7 +46,7 @@ const useStyles = makeStyles({
   }
 });
 
-type KostenkomponenteForm = Omit<Kostenkomponente, 'id' | 'version' | 'erstelltAm' | 'geaendertAm' | 'einheit'>;
+type KostenkomponenteForm = Omit<Kostenkomponente, 'id' | 'version' | 'erstelltAm' | 'geaendertAm'>;
 
 export default function NeueKostenkomponentePage() {
   const styles = useStyles();
@@ -58,6 +58,7 @@ export default function NeueKostenkomponentePage() {
     beschreibung: "",
     typ: "Sonstiges", // Default value
     betrag: 0,
+    einheit: "Stunde", // Default Einheit
     waehrung: "EUR", // Default Waehrung
     gueltigVon: new Date().toISOString().split('T')[0], // Default to today
     gueltigBis: "",
@@ -87,6 +88,7 @@ export default function NeueKostenkomponentePage() {
     if (!formData.name.trim()) newErrors.name = "Name ist erforderlich.";
     if (!formData.typ) newErrors.typ = "Typ ist erforderlich.";
     if (formData.betrag <= 0) newErrors.betrag = "Betrag muss größer als 0 sein.";
+    if (!formData.einheit.trim()) newErrors.einheit = "Einheit ist erforderlich.";
     if (!formData.waehrung.trim()) newErrors.waehrung = "Währung ist erforderlich.";
     if (!formData.gueltigVon) newErrors.gueltigVon = "Gültig von Datum ist erforderlich.";
     if (formData.gueltigBis && formData.gueltigVon > formData.gueltigBis) {
@@ -107,6 +109,7 @@ export default function NeueKostenkomponentePage() {
   const typOptionen: Kostenkomponente['typ'][] = ['Trassenpreis', 'Lokomotivkosten', 'Personalkosten', 'Energiekosten', 'Waggonkosten', 'Sonstiges'];
   const statusOptionen: Kostenkomponente['status'][] = ['aktiv', 'inaktiv'];
   const waehrungOptionen: string[] = ['EUR', 'CHF', 'USD', 'GBP'];
+  const einheitOptionen: string[] = ['km', 'Stunde', 'Tag', 'Woche', 'Monat', 'kWh', 'Stück', 'Einheit', 'Tonne', 'Waggon', 'Zug'];
 
   return (
     <div className="p-6">
@@ -162,7 +165,7 @@ export default function NeueKostenkomponentePage() {
             </select>
           </Field>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '24px' }}>
             <Field label="Betrag" required validationMessage={errors.betrag}>
               <Input
                 type="number"
@@ -172,6 +175,20 @@ export default function NeueKostenkomponentePage() {
                 step="0.01"
                 size="large"
               />
+            </Field>
+            <Field label="Einheit" required validationMessage={errors.einheit}>
+              <select
+                name="einheit"
+                value={formData.einheit}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base h-10"
+              >
+                {einheitOptionen.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Währung" required validationMessage={errors.waehrung}>
               <select
