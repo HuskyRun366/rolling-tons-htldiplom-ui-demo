@@ -84,6 +84,7 @@ export default function Angebote() {
   const [dateFilter, setDateFilter] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
   const [onlyMyOffers, setOnlyMyOffers] = useState(false);
+  const [angebotToDelete, setAngebotToDelete] = useState<typeof angebote[0] | null>(null);
   
   // Effekt zum Zurücksetzen der Seite bei Filteränderungen
   useEffect(() => {
@@ -190,6 +191,29 @@ export default function Angebote() {
     setDateFilter('all');
     setSortOption('newest');
     setOnlyMyOffers(false);
+    setAngebotToDelete(null);
+  };
+  
+  const handleDeleteAngebot = () => {
+    if (angebotToDelete) {
+      console.log("[AngebotePage] Calling deleteAngebot for ID:", angebotToDelete.id, "Angebot:", angebotToDelete);
+      try {
+        // Explicitly confirm IDs in console
+        console.log("Current angebote IDs:", angebote.map(a => `'${a.id}'`));
+        console.log("ID to delete (exact):", `'${angebotToDelete.id}'`);
+        
+        // Call the delete function
+        deleteAngebot(angebotToDelete.id);
+        console.log("Delete function called successfully");
+        
+        // Reset deletion state
+        setAngebotToDelete(null);
+      } catch (error) {
+        console.error("Error during delete:", error);
+      }
+    } else {
+      console.warn("[AngebotePage] handleDeleteAngebot called but angebotToDelete is null");
+    }
   };
   
   // Status-Badge-Farbe bestimmen
@@ -336,6 +360,17 @@ export default function Angebote() {
                     <Link href={`/angebote/${angebot.id}/bearbeiten`} passHref legacyBehavior>
                       <Button icon={<EditRegular />} size="small" as="a">Bearbeiten</Button>
                     </Link>
+                    <Button
+                      icon={<DeleteRegular />}
+                      size="small"
+                      appearance="subtle"
+                      onClick={() => {
+                        console.log("Delete button clicked for angebot:", angebot.id);
+                        setAngebotToDelete(angebot);
+                      }}
+                    >
+                      Löschen
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -400,6 +435,23 @@ export default function Angebote() {
           )}
         </div>
       </Card>
+
+      {/* Simple confirmation modal rendered at the bottom of the page */}
+      {angebotToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Angebot löschen</h3>
+            <p className="mb-6">Sind Sie sicher, dass Sie das Angebot "{angebotToDelete.nummer}" unwiderruflich löschen möchten?</p>
+            <div className="flex justify-end gap-3">
+              <Button appearance="secondary" onClick={() => setAngebotToDelete(null)}>Abbrechen</Button>
+              <Button appearance="primary" onClick={() => {
+                console.log("Confirm delete button clicked");
+                handleDeleteAngebot();
+              }}>Löschen</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

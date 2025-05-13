@@ -165,7 +165,46 @@ export function AngebotProvider({ children }: { children: ReactNode }) {
   
   // Angebot löschen
   const deleteAngebot = (id: string) => {
-    setAngebote(angebote.filter(angebot => angebot.id !== id));
+    console.log("[AngebotContext] Attempting to delete Angebot with ID:", id);
+    const initialCount = angebote.length;
+    
+    // Get the angebot to delete first
+    const angebotToDelete = angebote.find(a => {
+      const idMatches = a.id.toLowerCase() === id.toLowerCase();
+      console.log(`Comparing ${a.id} with ${id}: ${idMatches ? "match" : "no match"}`);
+      return idMatches;
+    });
+    
+    if (!angebotToDelete) {
+      console.error("[AngebotContext] No angebot found with ID:", id);
+      console.log("Available angebote IDs:", angebote.map(a => `${a.id} (${a.nummer})`));
+      return; // Exit early if angebot not found
+    }
+    
+    console.log("[AngebotContext] Found angebot to delete:", angebotToDelete.nummer);
+    
+    // Now filter out the angebot using both ID and nummer for extra certainty
+    const newAngebote = angebote.filter(angebot => {
+      return angebot.id.toLowerCase() !== id.toLowerCase() && 
+             angebot.nummer !== angebotToDelete.nummer;
+    });
+    
+    console.log("[AngebotContext] Angebote count before delete:", initialCount, "After filter:", newAngebote.length);
+    
+    if (initialCount === newAngebote.length) {
+      console.warn("[AngebotContext] Delete failed: Filter produced same length array");
+      return; // Exit if filter didn't remove anything
+    }
+    
+    // Set the new state and log the result
+    console.log("[AngebotContext] Setting new angebote array after deletion");
+    setAngebote(newAngebote);
+    
+    // Force update localStorage immediately to ensure persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('angebote', JSON.stringify(newAngebote));
+      console.log("[AngebotContext] Updated localStorage after deletion");
+    }
   };
   
   // Angebot nach ID suchen
