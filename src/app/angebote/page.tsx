@@ -352,25 +352,27 @@ export default function Angebote() {
                       {angebot.status.charAt(0).toUpperCase() + angebot.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex items-center gap-2">
-                    <Link href={`/angebote/${angebot.id}`} passHref legacyBehavior>
-                      <Button icon={<DocumentSearch24Regular />} size="small" as="a">Details</Button>
-                    </Link>
-                    <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
-                    <Link href={`/angebote/${angebot.id}/bearbeiten`} passHref legacyBehavior>
-                      <Button icon={<EditRegular />} size="small" as="a">Bearbeiten</Button>
-                    </Link>
-                    <Button
-                      icon={<DeleteRegular />}
-                      size="small"
-                      appearance="subtle"
-                      onClick={() => {
-                        console.log("Delete button clicked for angebot:", angebot.id);
-                        setAngebotToDelete(angebot);
-                      }}
-                    >
-                      Löschen
-                    </Button>
+                  <TableCell>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <Link href={`/angebote/${angebot.id}`} passHref legacyBehavior>
+                        <Button icon={<DocumentSearch24Regular />} size="small" as="a">Details</Button>
+                      </Link>
+                      <Button icon={<DocumentPdf20Regular />} size="small">PDF</Button>
+                      <Link href={`/angebote/${angebot.id}/bearbeiten`} passHref legacyBehavior>
+                        <Button icon={<EditRegular />} size="small" as="a">Bearb.</Button>
+                      </Link>
+                      <Button
+                        icon={<DeleteRegular />}
+                        size="small"
+                        appearance="subtle"
+                        onClick={() => {
+                          console.log("Delete button clicked for angebot:", angebot.id);
+                          setAngebotToDelete(angebot);
+                        }}
+                      >
+                        Löschen
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
