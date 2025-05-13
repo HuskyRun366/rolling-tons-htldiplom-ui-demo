@@ -40,8 +40,10 @@ import {
   DeleteRegular,
   SearchRegular
 } from "@fluentui/react-icons";
-import { useBahnhoefe } from "@/contexts/BahnhofContext";
+import { useBahnhoefe, Bahnhof } from "@/contexts/BahnhofContext";
 import { useKostenkomponenten, Kostenkomponente } from "@/contexts/KostenkomponenteContext";
+import { useLieferanten, Lieferant } from "@/contexts/LieferantenContext";
+import { useKonditionen, Kondition } from "@/contexts/KonditionenContext";
 
 export default function Stammdaten() {
   const { bahnhoefe, deleteBahnhof } = useBahnhoefe();
@@ -49,11 +51,13 @@ export default function Stammdaten() {
     kostenkomponenten, 
     deleteKostenkomponente 
   } = useKostenkomponenten();
+  const { lieferanten, deleteLieferant } = useLieferanten();
+  const { konditionen, deleteKondition } = useKonditionen();
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("bahnhoefe");
   const [searchTerm, setSearchTerm] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [entityToDelete, setEntityToDelete] = useState<'bahnhof' | 'kostenkomponente' | null>(null);
+  const [entityToDelete, setEntityToDelete] = useState<'bahnhof' | 'kostenkomponente' | 'lieferant' | 'kondition' | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Filter bahnhoefe based on search term
@@ -79,6 +83,21 @@ export default function Stammdaten() {
     );
   });
 
+  // Filter lieferanten based on search term
+  const filteredLieferanten = lieferanten.filter(lieferant =>
+    lieferant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lieferant.kontaktperson.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lieferant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lieferant.ort.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Filter konditionen based on search term
+  const filteredKonditionen = konditionen.filter(kondition =>
+    kondition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (kondition.beschreibung && kondition.beschreibung.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    kondition.typ.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Handle tab change
   const handleTabChange = (tab: TabValue) => {
     setSelectedTab(tab);
@@ -99,12 +118,30 @@ export default function Stammdaten() {
     setIsDeleteDialogOpen(true);
   };
 
+  // Handle delete confirmation for Lieferant
+  const handleDeleteLieferant = (id: string) => {
+    setConfirmDeleteId(id);
+    setEntityToDelete('lieferant');
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Handle delete confirmation for Kondition
+  const handleDeleteKondition = (id: string) => {
+    setConfirmDeleteId(id);
+    setEntityToDelete('kondition');
+    setIsDeleteDialogOpen(true);
+  };
+
   const handleDeleteConfirm = () => {
     if (confirmDeleteId) {
       if (entityToDelete === 'bahnhof') {
         deleteBahnhof(confirmDeleteId);
       } else if (entityToDelete === 'kostenkomponente') {
         deleteKostenkomponente(confirmDeleteId);
+      } else if (entityToDelete === 'lieferant') {
+        deleteLieferant(confirmDeleteId);
+      } else if (entityToDelete === 'kondition') {
+        deleteKondition(confirmDeleteId);
       }
       setConfirmDeleteId(null);
       setEntityToDelete(null);
@@ -391,11 +428,159 @@ export default function Stammdaten() {
           )}
           
           {selectedTab === "lieferanten" && (
-            <div>Lieferanten-Inhalt (noch nicht implementiert)</div>
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2">
+                  <Text weight="semibold" size={400}>Lieferanten & Partner</Text>
+                  <div className="relative">
+                    <Input 
+                      placeholder="Suchen..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      contentBefore={<SearchRegular />}
+                      className="w-64"
+                    />
+                  </div>
+                </div>
+                <Link href="/stammdaten/lieferanten/neu">
+                  <Button appearance="primary" icon={<AddRegular />}>Lieferant/Partner hinzufügen</Button>
+                </Link>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Name</TableHeaderCell>
+                    <TableHeaderCell>Typ</TableHeaderCell>
+                    <TableHeaderCell>Kontaktperson</TableHeaderCell>
+                    <TableHeaderCell>E-Mail</TableHeaderCell>
+                    <TableHeaderCell>Telefon</TableHeaderCell>
+                    <TableHeaderCell>Ort</TableHeaderCell>
+                    <TableHeaderCell>Land</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell>Aktionen</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLieferanten.length > 0 ? (
+                    filteredLieferanten.map((lieferant) => (
+                      <TableRow key={lieferant.id}>
+                        <TableCell>{lieferant.name}</TableCell>
+                        <TableCell>{lieferant.typ}</TableCell>
+                        <TableCell>{lieferant.kontaktperson}</TableCell>
+                        <TableCell>{lieferant.email}</TableCell>
+                        <TableCell>{lieferant.telefon}</TableCell>
+                        <TableCell>{lieferant.ort}</TableCell>
+                        <TableCell>{lieferant.land}</TableCell>
+                        <TableCell>
+                          <Badge color={lieferant.status === 'aktiv' ? 'success' : 'warning'}>
+                            {lieferant.status.charAt(0).toUpperCase() + lieferant.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Link href={`/stammdaten/lieferanten/${lieferant.id}`}>
+                              <Button icon={<EditRegular />} size="medium">Bearbeiten</Button>
+                            </Link>
+                            <Button 
+                              icon={<DeleteRegular />} 
+                              size="medium"
+                              appearance="transparent"
+                              onClick={() => handleDeleteLieferant(lieferant.id)}
+                            >
+                              Löschen
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={9} style={{ textAlign: "center", padding: "20px" }}>
+                        Keine Lieferanten oder Partner gefunden.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </>
           )}
           
           {selectedTab === "konditionen" && (
-            <div>Konditionen-Inhalt (noch nicht implementiert)</div>
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2">
+                  <Text weight="semibold" size={400}>Konditionen</Text>
+                  <div className="relative">
+                    <Input 
+                      placeholder="Suchen..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      contentBefore={<SearchRegular />}
+                      className="w-64"
+                    />
+                  </div>
+                </div>
+                <Link href="/stammdaten/konditionen/neu">
+                  <Button appearance="primary" icon={<AddRegular />}>Kondition hinzufügen</Button>
+                </Link>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Name</TableHeaderCell>
+                    <TableHeaderCell>Typ</TableHeaderCell>
+                    <TableHeaderCell>Wert</TableHeaderCell>
+                    <TableHeaderCell>Gültig Von</TableHeaderCell>
+                    <TableHeaderCell>Gültig Bis</TableHeaderCell>
+                    <TableHeaderCell>Beschreibung</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell>Aktionen</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredKonditionen.length > 0 ? (
+                    filteredKonditionen.map((kondition) => (
+                      <TableRow key={kondition.id}>
+                        <TableCell>{kondition.name}</TableCell>
+                        <TableCell>{kondition.typ}</TableCell>
+                        <TableCell>{kondition.wert}{kondition.istProzent ? '%' : ' EUR'}</TableCell>
+                        <TableCell>{new Date(kondition.gueltigVon).toLocaleDateString()}</TableCell>
+                        <TableCell>{kondition.gueltigBis ? new Date(kondition.gueltigBis).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>{kondition.beschreibung || '-'}</TableCell>
+                        <TableCell>
+                          <Badge color={kondition.status === 'aktiv' ? 'success' : 'warning'}>
+                            {kondition.status.charAt(0).toUpperCase() + kondition.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Link href={`/stammdaten/konditionen/${kondition.id}`}>
+                              <Button icon={<EditRegular />} size="medium">Bearbeiten</Button>
+                            </Link>
+                            <Button 
+                              icon={<DeleteRegular />} 
+                              size="medium"
+                              appearance="transparent"
+                              onClick={() => handleDeleteKondition(kondition.id)}
+                            >
+                              Löschen
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} style={{ textAlign: "center", padding: "20px" }}>
+                        Keine Konditionen gefunden.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </>
           )}
         </div>
       </Card>
@@ -407,6 +592,8 @@ export default function Stammdaten() {
             <DialogTitle>
               {entityToDelete === 'bahnhof' && "Bahnhof löschen"}
               {entityToDelete === 'kostenkomponente' && "Kostenkomponente löschen"}
+              {entityToDelete === 'lieferant' && "Lieferant/Partner löschen"}
+              {entityToDelete === 'kondition' && "Kondition löschen"}
             </DialogTitle>
             <DialogContent>
               Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
