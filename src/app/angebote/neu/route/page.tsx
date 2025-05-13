@@ -163,16 +163,16 @@ export default function RouteAngebot() {
   const goToPreviousStep = () => {
     // Sicherstellen, dass der Kontext gespeichert ist
     updateContext();
-    // Sanfte Navigation mit Next.js Router
-    router.push("/angebote/neu");
+    // Direkte Navigation mit window.location
+    window.location.href = "/angebote/neu";
   };
   
   // Navigation zum nächsten Schritt
   const goToNextStep = () => {
     // Sicherstellen, dass der Kontext gespeichert ist
     updateContext();
-    // Sanfte Navigation mit Next.js Router
-    router.push("/angebote/neu/kalkulation");
+    // Direkte Navigation mit window.location
+    window.location.href = "/angebote/neu/kalkulation";
   };
   
   return (
@@ -290,13 +290,20 @@ export default function RouteAngebot() {
           </div>
           
           <div className="mt-8 flex justify-between">
-            <Button icon={<ArrowLeftRegular />} onClick={goToPreviousStep}>
+            <button 
+              className="flex items-center px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100" 
+              onClick={goToPreviousStep}
+            >
+              <ArrowLeftRegular className="mr-2" />
               Zurück zu Grunddaten
-            </Button>
-            <Button appearance="primary" onClick={goToNextStep}>
+            </button>
+            <button 
+              className="flex items-center px-4 py-2 border rounded-md bg-blue-600 text-white hover:bg-blue-700" 
+              onClick={goToNextStep}
+            >
               Weiter zur Kalkulation
               <ArrowRightRegular className="ml-2" />
-            </Button>
+            </button>
           </div>
         </div>
       </Card>
