@@ -153,11 +153,11 @@ export default function Stammdaten() {
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
                           <Link href={`/stammdaten/bahnhoefe/${bahnhof.id}`}>
-                            <Button icon={<EditRegular />} size="small">Bearbeiten</Button>
+                            <Button icon={<EditRegular />} size="medium">Bearbeiten</Button>
                           </Link>
                           <Button 
                             icon={<DeleteRegular />} 
-                            size="small"
+                            size="medium"
                             onClick={() => {
                               setConfirmDeleteId(bahnhof.id);
                               setIsDeleteDialogOpen(true);
