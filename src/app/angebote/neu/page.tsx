@@ -11,7 +11,6 @@ import {
   Textarea,
   Checkbox,
   SpinButton,
-  Slider,
   Radio,
   RadioGroup,
   Label,
@@ -100,7 +99,6 @@ export default function NeuesAngebot() {
   const [gueltigBis, setGueltigBis] = useState(wizard.grunddaten.gueltigBis);
   const [projekt, setProjekt] = useState(wizard.grunddaten.projekt);
   const [vertragsart, setVertragsart] = useState(wizard.grunddaten.vertragsart);
-  const [prioritaet, setPrioritaet] = useState(wizard.grunddaten.prioritaet);
   const [bemerkungen, setBemerkungen] = useState(wizard.grunddaten.bemerkungen);
   const [leerfahrt, setLeerfahrt] = useState(wizard.grunddaten.leerfahrt);
   const [rueckfahrt, setRueckfahrt] = useState(wizard.grunddaten.rueckfahrt);
@@ -141,7 +139,6 @@ export default function NeuesAngebot() {
       gueltigBis,
       projekt,
       vertragsart,
-      prioritaet,
       bemerkungen,
       leerfahrt,
       rueckfahrt,
@@ -149,7 +146,7 @@ export default function NeuesAngebot() {
     });
   }, [
     selectedCustomer, selectedContact, transportgut, menge, selectedUnit,
-    gueltigBis, projekt, vertragsart, prioritaet, bemerkungen,
+    gueltigBis, projekt, vertragsart, bemerkungen,
     leerfahrt, rueckfahrt, express, updateGrunddaten, customerOptions, contactOptions
   ]);
   
@@ -254,22 +251,15 @@ export default function NeuesAngebot() {
                 </div>
               </Field>
               
-              <Field label="Projekt/Referenz" className="mt-4">
-                <Input 
-                  placeholder="z.B. Jahresprojekt 2025" 
-                  value={projekt}
-                  onChange={(e) => setProjekt(e.target.value)}
-                />
+              <Field label="Projektbezeichnung / Referenz" className="mt-4">
+                <Input placeholder="Optional" value={projekt} onChange={(e) => setProjekt(e.target.value)} />
               </Field>
               
               <Field label="Vertragsart" className="mt-4">
-                <RadioGroup 
-                  value={vertragsart}
-                  onChange={(e, data) => setVertragsart(data.value as string)}
-                >
-                  <Radio value="single" label="Einzelangebot" />
-                  <Radio value="framework" label="Rahmenvertrag" />
-                  <Radio value="expansion" label="Ergänzung zu bestehendem Vertrag" />
+                <RadioGroup value={vertragsart} onChange={(_,data) => setVertragsart(data.value)} layout="horizontal">
+                  <Radio value="Einzelvertrag" label="Einzelvertrag" />
+                  <Radio value="Rahmenvertrag" label="Rahmenvertrag" />
+                  <Radio value="Sondervereinbarung" label="Sondervereinbarung" />
                 </RadioGroup>
               </Field>
             </div>
@@ -303,16 +293,6 @@ export default function NeuesAngebot() {
                     />
                   </div>
                 </div>
-              </Field>
-              
-              <Field label="Priorität" className="mt-4">
-                <Slider 
-                  min={1} 
-                  max={5} 
-                  step={1} 
-                  value={prioritaet}
-                  onChange={(e, data) => setPrioritaet(data.value as number)}
-                />
               </Field>
               
               <Field label="Bemerkungen/Hinweise" className="mt-4">
