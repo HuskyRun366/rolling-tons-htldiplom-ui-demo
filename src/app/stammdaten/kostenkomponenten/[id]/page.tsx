@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Button,
   Input,
@@ -46,83 +47,39 @@ const useStyles = makeStyles({
   }
 });
 
-type KostenkomponenteForm = Omit<Kostenkomponente, 'id' | 'version' | 'erstelltAm' | 'geaendertAm'>;
-
-export default function NeueKostenkomponentePage() {
+export default function EditKostenkomponentePage() {
   const styles = useStyles();
   const router = useRouter();
-  const { addKostenkomponente } = useKostenkomponenten();
-
-  const [formData, setFormData] = useState<KostenkomponenteForm>({
+  const params = useParams();
+  const id = params.id as string;
+  const { kostenkomponenten, updateKostenkomponente, getKostenkomponenteById } = useKostenkomponenten();
+  
+  const [formData, setFormData] = useState<Omit<Kostenkomponente, 'id' | 'version' | 'erstelltAm' | 'geaendertAm'>>({
     name: "",
     beschreibung: "",
-    typ: "Sonstiges", // Default value
+    typ: "Sonstiges",
     betrag: 0,
-    einheit: "EUR/Stunde", // Updated default Einheit
-    waehrung: "EUR", // Default Waehrung
-    gueltigVon: new Date().toISOString().split('T')[0], // Default to today
+    einheit: "EUR/Stunde",
+    waehrung: "EUR",
+    gueltigVon: new Date().toISOString().split('T')[0],
     gueltigBis: "",
     status: "aktiv",
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof KostenkomponenteForm, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Omit<Kostenkomponente, 'id' | 'version' | 'erstelltAm' | 'geaendertAm'>, string>>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    // If changing the type, also update the unit to a suitable default
-    if (name === 'typ') {
-      const typValue = value as Kostenkomponente['typ'];
-      const newUnits = getEinheitOptionenByTyp(typValue);
-      setFormData(prev => ({ 
-        ...prev, 
-        [name]: typValue,
-        // Set unit to the first option of the new type if current unit not in new options
-        einheit: newUnits.includes(prev.einheit) ? prev.einheit : newUnits[0]
-      }));
+  useEffect(() => {
+    const kostenkomponente = getKostenkomponenteById(id);
+    if (kostenkomponente) {
+      const { id: _, version: __, erstelltAm: ___, geaendertAm: ____, ...rest } = kostenkomponente;
+      setFormData(rest);
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      // Handle case when cost component is not found
+      router.push("/stammdaten?tab=kostenkomponenten");
     }
-    
-    if (errors[name as keyof KostenkomponenteForm]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleBetragChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, betrag: value === '' ? 0 : parseFloat(value) }));
-     if (errors.betrag) {
-        setErrors(prev => ({ ...prev, betrag: undefined }));
-      }
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof KostenkomponenteForm, string>> = {};
-    if (!formData.name.trim()) newErrors.name = "Name ist erforderlich.";
-    if (!formData.typ) newErrors.typ = "Typ ist erforderlich.";
-    if (formData.betrag <= 0) newErrors.betrag = "Betrag muss größer als 0 sein.";
-    if (!formData.einheit.trim()) newErrors.einheit = "Einheit ist erforderlich.";
-    if (!formData.waehrung.trim()) newErrors.waehrung = "Währung ist erforderlich.";
-    if (!formData.gueltigVon) newErrors.gueltigVon = "Gültig von Datum ist erforderlich.";
-    if (formData.gueltigBis && formData.gueltigVon > formData.gueltigBis) {
-      newErrors.gueltigBis = "Gültig bis Datum darf nicht vor Gültig von Datum liegen.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      addKostenkomponente(formData);
-      router.push("/stammdaten?tab=kostenkomponenten"); // Redirect and select tab
-    }
-  };
-
-  const typOptionen: Kostenkomponente['typ'][] = ['Trassenpreis', 'Lokomotivkosten', 'Personalkosten', 'Energiekosten', 'Waggonkosten', 'Sonstiges'];
-  const statusOptionen: Kostenkomponente['status'][] = ['aktiv', 'inaktiv'];
-  const waehrungOptionen: string[] = ['EUR', 'CHF', 'USD', 'GBP'];
+    setIsLoading(false);
+  }, [id, getKostenkomponenteById, router]);
 
   // Define unit options based on cost component type
   const getEinheitOptionenByTyp = (typ: Kostenkomponente['typ']): string[] => {
@@ -145,6 +102,66 @@ export default function NeueKostenkomponentePage() {
 
   // Get appropriate units based on current type
   const einheitOptionen = getEinheitOptionenByTyp(formData.typ);
+  const typOptionen: Kostenkomponente['typ'][] = ['Trassenpreis', 'Lokomotivkosten', 'Personalkosten', 'Energiekosten', 'Waggonkosten', 'Sonstiges'];
+  const statusOptionen: Kostenkomponente['status'][] = ['aktiv', 'inaktiv'];
+  const waehrungOptionen: string[] = ['EUR', 'CHF', 'USD', 'GBP'];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    // If changing the type, also update the unit to a suitable default
+    if (name === 'typ') {
+      const typValue = value as Kostenkomponente['typ'];
+      const newUnits = getEinheitOptionenByTyp(typValue);
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: typValue,
+        // Set unit to the first option of the new type if current unit not in new options
+        einheit: newUnits.includes(prev.einheit) ? prev.einheit : newUnits[0]
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
+    if (errors[name as keyof typeof formData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleBetragChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, betrag: value === '' ? 0 : parseFloat(value) }));
+     if (errors.betrag) {
+        setErrors(prev => ({ ...prev, betrag: undefined }));
+      }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof typeof formData, string>> = {};
+    if (!formData.name.trim()) newErrors.name = "Name ist erforderlich.";
+    if (!formData.typ) newErrors.typ = "Typ ist erforderlich.";
+    if (formData.betrag <= 0) newErrors.betrag = "Betrag muss größer als 0 sein.";
+    if (!formData.einheit.trim()) newErrors.einheit = "Einheit ist erforderlich.";
+    if (!formData.waehrung.trim()) newErrors.waehrung = "Währung ist erforderlich.";
+    if (!formData.gueltigVon) newErrors.gueltigVon = "Gültig von Datum ist erforderlich.";
+    if (formData.gueltigBis && formData.gueltigVon > formData.gueltigBis) {
+      newErrors.gueltigBis = "Gültig bis Datum darf nicht vor Gültig von Datum liegen.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      updateKostenkomponente(id, formData);
+      router.push("/stammdaten?tab=kostenkomponenten");
+    }
+  };
+
+  if (isLoading) {
+    return <div className="p-6">Daten werden geladen...</div>;
+  }
 
   return (
     <div className="p-6">
@@ -158,15 +175,15 @@ export default function NeueKostenkomponentePage() {
             <Link href="/stammdaten?tab=kostenkomponenten">Stammdaten</Link>
           </BreadcrumbItem>
           <BreadcrumbDivider />
-          <BreadcrumbItem>Neue Kostenkomponente</BreadcrumbItem>
+          <BreadcrumbItem>Kostenkomponente bearbeiten</BreadcrumbItem>
         </Breadcrumb>
       </div>
 
-      <Title2 align="center" className="mb-6">Neue Kostenkomponente erstellen</Title2>
+      <Title2 align="center" className="mb-6">Kostenkomponente bearbeiten</Title2>
 
       <Card className={styles.card}>
         <form onSubmit={handleSubmit} className={styles.formContainer}>
-          <Field label="Name der Kostenkomponente" required  validationMessage={errors.name}>
+          <Field label="Name der Kostenkomponente" required validationMessage={errors.name}>
             <Input
               name="name"
               value={formData.name}
@@ -178,7 +195,7 @@ export default function NeueKostenkomponentePage() {
           <Field label="Beschreibung (optional)" validationMessage={errors.beschreibung}>
             <Textarea
               name="beschreibung"
-              value={formData.beschreibung}
+              value={formData.beschreibung || ''}
               onChange={handleChange}
               placeholder="Zusätzliche Details zur Kostenkomponente"
               rows={3}
@@ -255,7 +272,7 @@ export default function NeueKostenkomponentePage() {
               <Input
                 type="date"
                 name="gueltigBis"
-                value={formData.gueltigBis}
+                value={formData.gueltigBis || ''}
                 onChange={handleChange}
                 size="large"
               />
