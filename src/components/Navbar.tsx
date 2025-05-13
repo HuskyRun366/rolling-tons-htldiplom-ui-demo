@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import { 
   Button,
   Text,
@@ -58,17 +59,21 @@ const useStyles = makeStyles({
     },
   },
   navItemActive: {
-    backgroundColor: '#e1edff',
+    backgroundColor: '#e1edff !important',
     fontWeight: 'bold',
+    color: '#005a9e !important',
     
     ':hover': {
-      backgroundColor: '#d1e3ff',
+      backgroundColor: '#d1e3ff !important',
     },
   },
   navIcon: {
     marginRight: '0.75rem',
     display: 'flex',
     alignItems: 'center',
+  },
+  activeIcon: {
+    color: '#005a9e !important',
   },
   userArea: {
     marginTop: 'auto',
@@ -90,8 +95,18 @@ const useStyles = makeStyles({
   }
 });
 
+const navLinks = [
+  { href: "/", label: "Dashboard", icon: <AppsRegular /> },
+  { href: "/angebote", label: "Angebote", icon: <DocumentRegular /> },
+  { href: "/kunden", label: "Kunden", icon: <PeopleRegular /> },
+  { href: "/stammdaten", label: "Stammdaten", icon: <DatabaseRegular /> },
+  { href: "/berichte", label: "Berichte", icon: <DataBarVerticalRegular /> },
+  { href: "/einstellungen", label: "Einstellungen", icon: <SettingsRegular /> },
+];
+
 export default function Navbar() {
   const styles = useStyles();
+  const pathname = usePathname();
   
   return (
     <nav className={styles.nav}>
@@ -103,42 +118,24 @@ export default function Navbar() {
       </div>
       
       <ul className={styles.navList}>
-        <li>
-          <Link href="/" className={`${styles.navItem} ${styles.navItemActive}`}>
-            <span className={styles.navIcon}><AppsRegular /></span>
-            Dashboard
-          </Link>
-        </li>
-        <li>
-          <Link href="/angebote" className={styles.navItem}>
-            <span className={styles.navIcon}><DocumentRegular /></span>
-            Angebote
-          </Link>
-        </li>
-        <li>
-          <Link href="/kunden" className={styles.navItem}>
-            <span className={styles.navIcon}><PeopleRegular /></span>
-            Kunden
-          </Link>
-        </li>
-        <li>
-          <Link href="/stammdaten" className={styles.navItem}>
-            <span className={styles.navIcon}><DatabaseRegular /></span>
-            Stammdaten
-          </Link>
-        </li>
-        <li>
-          <Link href="/berichte" className={styles.navItem}>
-            <span className={styles.navIcon}><DataBarVerticalRegular /></span>
-            Berichte
-          </Link>
-        </li>
-        <li>
-          <Link href="/einstellungen" className={styles.navItem}>
-            <span className={styles.navIcon}><SettingsRegular /></span>
-            Einstellungen
-          </Link>
-        </li>
+        {navLinks.map(link => {
+          const isActive =
+            link.href === "/"
+              ? pathname === link.href
+              : pathname.startsWith(link.href);
+          
+          return (
+            <li key={link.href}>
+              <Link 
+                href={link.href} 
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+              >
+                <span className={`${styles.navIcon} ${isActive ? styles.activeIcon : ''}`}>{link.icon}</span>
+                {link.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
       
       <div className={styles.userArea}>
