@@ -330,24 +330,41 @@ export default function AngebotDetails() {
                     <Text className={styles.detailValue}>
                       {angebot.abfahrt && angebot.ankunft 
                         ? `${angebot.abfahrt.split(',')[0]} - ${angebot.ankunft.split(',')[0]}`
-                        : '15.05.2025 - 20.05.2025'
+                        : '15.05.2025 - 16.05.2025'
                       }
                     </Text>
                   </div>
                 </div>
-                <div>
-                  <div className={styles.routeCard}>
-                    <Text weight="semibold" align="center">{angebot.route}</Text>
-                    <div className={styles.routeArrow}>↓</div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Text weight="semibold">Abfahrt:</Text>
-                        <Text>{angebot.abfahrt}</Text>
+              </div>
+              
+              <div className="mt-8">
+                <Title3 className="mb-4">Route</Title3>
+                <div className="flex items-center justify-between w-full">
+                  <div className="text-right flex-1">
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
+                      <Text size={400}>AT</Text>
+                    </div>
+                    <div>
+                      <Text weight="semibold" as="span">Wien Hauptbahnhof</Text>
+                      <Text size={200} as="span" className="ml-2">Wien, Österreich</Text>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 max-w-60 mx-4 text-center">
+                    <div className="h-0.5 bg-gray-200 relative w-full">
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 whitespace-nowrap">
+                        <Text>920 km</Text>
                       </div>
-                      <div>
-                        <Text weight="semibold">Ankunft:</Text>
-                        <Text>{angebot.ankunft}</Text>
-                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-left flex-1">
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2">
+                      <Text size={400}>DE</Text>
+                    </div>
+                    <div>
+                      <Text weight="semibold" as="span">Hamburg Hauptbahnhof</Text>
+                      <Text size={200} as="span" className="ml-2">Hamburg, Deutschland</Text>
                     </div>
                   </div>
                 </div>
