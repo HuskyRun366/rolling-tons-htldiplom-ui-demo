@@ -318,7 +318,7 @@ export default function NeuesAngebot() {
                 Projektbezeichnung / Referenz
               </label>
               <Input 
-                className="h-10 w-full mt-6"
+                className="h-10 w-full mt-4"
                 placeholder="Optional" 
                 value={projekt} 
                 onChange={(e) => setProjekt(e.target.value)} 
@@ -326,12 +326,12 @@ export default function NeuesAngebot() {
             </div>
             
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Gültigkeitsdauer
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
+                  <label className="block text-sm font-small text-gray-700 mb-1">Von</label>
                   <Input 
                     className="h-10 w-full"
                     type="date" 
@@ -340,7 +340,7 @@ export default function NeuesAngebot() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+                  <label className="block text-sm font-small text-gray-700 mb-1">Bis</label>
                   <Input 
                     className="h-10 w-full"
                     type="date" 
