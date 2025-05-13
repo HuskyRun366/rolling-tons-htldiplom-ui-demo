@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={inter.className}>
-        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+            <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

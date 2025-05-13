@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Button, 
@@ -36,6 +36,38 @@ import {
 } from "@fluentui/react-icons";
 import { useAngebote } from "@/contexts/AngebotContext";
 
+// Hilfsfunktion zum Parsen des Datums (DD.MM.YYYY)
+const parseDate = (dateString: string): Date | null => {
+  const parts = dateString.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+  if (!parts) return null;
+  // Monate sind 0-basiert in JavaScript Date
+  return new Date(parseInt(parts[3], 10), parseInt(parts[2], 10) - 1, parseInt(parts[1], 10));
+};
+
+// Options for Dropdowns
+const statusOptions = [
+  { value: 'all', text: 'Alle Status' },
+  { value: 'offen', text: 'Offen' },
+  { value: 'angenommen', text: 'Angenommen' },
+  { value: 'abgelehnt', text: 'Abgelehnt' },
+  { value: 'storniert', text: 'Storniert' },
+];
+
+const dateOptions = [
+  { value: 'all', text: 'Alle Zeiträume' },
+  { value: 'today', text: 'Heute' },
+  { value: 'week', text: 'Diese Woche' },
+  { value: 'month', text: 'Dieser Monat' },
+  { value: 'custom', text: 'Benutzerdefiniert' }, // Keep custom option, even if not fully implemented
+];
+
+const sortOptionsData = [
+  { value: 'newest', text: 'Neueste zuerst' },
+  { value: 'oldest', text: 'Älteste zuerst' },
+  { value: 'amount-high', text: 'Betrag (hoch-niedrig)' },
+  { value: 'amount-low', text: 'Betrag (niedrig-hoch)' },
+];
+
 export default function Angebote() {
   const { 
     angebote, 
@@ -53,6 +85,11 @@ export default function Angebote() {
   const [sortOption, setSortOption] = useState('newest');
   const [onlyMyOffers, setOnlyMyOffers] = useState(false);
   
+  // Effekt zum Zurücksetzen der Seite bei Filteränderungen
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, dateFilter, sortOption, onlyMyOffers, setPage]);
+  
   // Angebote filtern und sortieren
   const filteredAngebote = angebote
     .filter(angebot => {
@@ -66,6 +103,58 @@ export default function Angebote() {
       // Status
       if (statusFilter !== 'all' && angebot.status !== statusFilter) {
         return false;
+      }
+      
+      // Datum
+      if (dateFilter !== 'all') {
+        const offerDate = parseDate(angebot.erstelldatum);
+        if (!offerDate) return false; // Datum konnte nicht geparsed werden
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        switch (dateFilter) {
+          case 'today':
+            if (offerDate.getTime() !== today.getTime()) {
+              return false;
+            }
+            break;
+          case 'week':
+            const firstDayOfWeek = new Date(today);
+            const dayOfWeek = today.getDay(); // 0 = Sonntag, 1 = Montag, ...
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Montag als erster Tag
+            firstDayOfWeek.setDate(diff);
+            firstDayOfWeek.setHours(0, 0, 0, 0);
+            const lastDayOfWeek = new Date(firstDayOfWeek);
+            lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+            lastDayOfWeek.setHours(23, 59, 59, 999);
+            if (offerDate < firstDayOfWeek || offerDate > lastDayOfWeek) {
+              return false;
+            }
+            break;
+          case 'month':
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            lastDayOfMonth.setHours(23, 59, 59, 999);
+            if (offerDate < firstDayOfMonth || offerDate > lastDayOfMonth) {
+              return false;
+            }
+            break;
+          // 'custom' würde hier implementiert werden, falls DatePicker hinzugefügt wird
+        }
+      }
+      
+      // "Meine Angebote" (Placeholder - Annahme: Es gibt ein 'createdBy' Feld)
+      if (onlyMyOffers) {
+        // Hier müsste die Logik hin, um zu prüfen, ob das Angebot vom
+        // aktuellen Benutzer erstellt wurde. Beispiel:
+        // const currentUserId = "user123"; // ID des eingeloggten Benutzers
+        // if (angebot.createdBy !== currentUserId) { 
+        //   return false;
+        // }
+        // Da 'createdBy' noch nicht existiert, filtern wir erstmal nichts
+        // TODO: Implementieren, wenn Benutzerdaten verfügbar sind.
+        console.warn("'Meine Angebote' Filter ist noch nicht implementiert.");
       }
       
       return true;
@@ -135,8 +224,8 @@ export default function Angebote() {
 
       <Card className="mb-6">
         <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="search">Suche</Label>
               <Input
                 id="search"
@@ -144,66 +233,70 @@ export default function Angebote() {
                 contentBefore={<Search24Regular />}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-10"
               />
             </div>
             
-            <div>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="status-filter">Status</Label>
-              <Dropdown 
-                id="status-filter" 
-                placeholder="Alle Status"
+              <select
+                id="status-filter"
                 value={statusFilter}
-                onOptionSelect={(_, data) => setStatusFilter(data.optionValue || 'all')}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 h-10 text-sm bg-white"
               >
-                <Option value="all">Alle Status</Option>
-                <Option value="offen">Offen</Option>
-                <Option value="angenommen">Angenommen</Option>
-                <Option value="abgelehnt">Abgelehnt</Option>
-                <Option value="storniert">Storniert</Option>
-              </Dropdown>
+                {statusOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.text}
+                  </option>
+                ))}
+              </select>
             </div>
             
-            <div>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="date-filter">Datum</Label>
-              <Dropdown 
-                id="date-filter" 
-                placeholder="Alle Zeiträume"
+              <select
+                id="date-filter"
                 value={dateFilter}
-                onOptionSelect={(_, data) => setDateFilter(data.optionValue || 'all')}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 h-10 text-sm bg-white"
               >
-                <Option value="all">Alle Zeiträume</Option>
-                <Option value="today">Heute</Option>
-                <Option value="week">Diese Woche</Option>
-                <Option value="month">Dieser Monat</Option>
-                <Option value="custom">Benutzerdefiniert</Option>
-              </Dropdown>
+                {dateOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.text}
+                  </option>
+                ))}
+              </select>
             </div>
             
-            <div>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="sorting">Sortierung</Label>
-              <Dropdown 
-                id="sorting" 
-                placeholder="Sortieren nach"
+              <select
+                id="sorting"
                 value={sortOption}
-                onOptionSelect={(_, data) => setSortOption(data.optionValue || 'newest')}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 h-10 text-sm bg-white"
               >
-                <Option value="newest">Neueste zuerst</Option>
-                <Option value="oldest">Älteste zuerst</Option>
-                <Option value="amount-high">Betrag (hoch-niedrig)</Option>
-                <Option value="amount-low">Betrag (niedrig-hoch)</Option>
-              </Dropdown>
+                {sortOptionsData.map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.text}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Button icon={<FilterRegular />} onClick={resetFilters}>Filter zurücksetzen</Button>
             <Button icon={<ArrowDownRegular />}>Exportieren</Button>
-            <Divider vertical />
-            <Checkbox 
-              label="Meine Angebote" 
-              checked={onlyMyOffers}
-              onChange={(_, data) => setOnlyMyOffers(!!data.checked)}
-            />
+            <div className="flex items-center">
+              <Checkbox 
+                id="my-offers-checkbox"
+                label="Meine Angebote" 
+                checked={onlyMyOffers}
+                onChange={(_, data) => setOnlyMyOffers(!!data.checked)}
+              />
+            </div>
           </div>
         </div>
       </Card>
