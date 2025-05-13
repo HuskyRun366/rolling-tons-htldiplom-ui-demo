@@ -114,7 +114,7 @@ export default function AbschlussAngebot() {
         <div className="flex flex-col">
           <Title2>Angebot {angebotsDaten.nummer}</Title2>
           <Text className="ml-1">
-            Erstellt am {erstelldatumForPreview} durch Bill Meixner
+            Erstellt am {erstelldatumForPreview} durch Max Mustermann
           </Text>
         </div>
       </div>
