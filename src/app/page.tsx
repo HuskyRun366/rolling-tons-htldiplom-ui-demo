@@ -54,7 +54,7 @@ export default function Dashboard() {
         <div className="flex justify-between items-center">
           <div>
             <Title3>Rolling-Tons Angebotssoftware</Title3>
-            <span className="ml-4 text-sm">Willkommen zurück, Bill Meixner</span>
+            <span className="ml-4 text-sm">Willkommen zurück, Max Mustermann</span>
           </div>
           <Link href="/angebote/neu">
             <Button appearance="primary" icon={<DocumentAdd24Regular />}>Neues Angebot</Button>

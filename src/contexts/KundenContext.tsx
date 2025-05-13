@@ -14,33 +14,33 @@ export interface Kunde {
 const initialKunden: Kunde[] = [
   {
     id: 'kunde-001',
-    name: 'R.A.T.H. Logistik GmbH',
-    ansprechpartner: ['Dr. Hans Wagner', 'Sabine Huber']
+    name: 'Kunde 1 GmbH',
+    ansprechpartner: ['Max Mustermann', 'Anna Schmidt']
   },
   {
     id: 'kunde-002',
-    name: 'Wiener Transport AG',
-    ansprechpartner: ['DI Maria Schmid', 'Markus Weber']
+    name: 'Kunde 2 AG',
+    ansprechpartner: ['Erika Musterfrau', 'Thomas Beispiel']
   },
   {
     id: 'kunde-003',
-    name: 'Alpen Cargo',
-    ansprechpartner: ['Josef Müller']
+    name: 'Kunde 3 KG',
+    ansprechpartner: ['Peter Test']
   },
   {
     id: 'kunde-004',
-    name: 'ÖBB Rail Cargo',
-    ansprechpartner: ['Thomas Bauer', 'Julia Klein']
+    name: 'Kunde 4 GmbH & Co. KG',
+    ansprechpartner: ['Klaus Modell', 'Sarah Beispiel']
   },
   {
     id: 'kunde-005',
-    name: 'Swiss Rail Solutions',
-    ansprechpartner: ['Martina Weber']
+    name: 'Kunde 5 AG',
+    ansprechpartner: ['Lisa Demo']
   },
   {
     id: 'kunde-006',
-    name: 'Deutsche Bahn Cargo',
-    ansprechpartner: ['Stefan Meier']
+    name: 'Kunde 6 Handel',
+    ansprechpartner: ['Michael Probe']
   }
 ];
 

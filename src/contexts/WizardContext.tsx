@@ -51,39 +51,41 @@ export interface WizardState {
 
 // Standardwerte
 const defaultGrunddaten: GrunddatenState = {
-  kunde: "",
-  ansprechpartner: "",
-  transportgut: "",
-  menge: "0",
+  kunde: "Kunde 1 GmbH",
+  ansprechpartner: "Max Mustermann",
+  transportgut: "Testware 1",
+  menge: "20",
   einheit: "t",
-  gueltigBis: "",
-  projekt: "",
+  gueltigBis: "01.07.2025",
+  projekt: "Testprojekt 1",
   vertragsart: "single",
   prioritaet: 3,
-  bemerkungen: "",
+  bemerkungen: "Dies ist ein Test für Mockups",
   leerfahrt: false,
   rueckfahrt: false,
   express: false
 };
 
 const defaultRoute: RouteState = {
-  startbahnhof: "",
-  zielbahnhof: "",
-  abfahrt: "",
-  ankunft: ""
+  startbahnhof: "Bahnhof A",
+  zielbahnhof: "Bahnhof B",
+  abfahrt: "10.06.2025, 08:00",
+  ankunft: "11.06.2025, 16:00"
 };
 
 const defaultKalkulation: KalkulationState = {
   kostenkomponenten: [
-    { bezeichnung: "Bahnnutzung", preis: 0, menge: 1, gesamt: 0 }
+    { bezeichnung: "Kostenkomponente 1", preis: 5000, menge: 1, gesamt: 5000 },
+    { bezeichnung: "Kostenkomponente 2", preis: 2000, menge: 1, gesamt: 2000 },
+    { bezeichnung: "Kostenkomponente 3", preis: 1000, menge: 2, gesamt: 2000 }
   ],
-  rabatt: 0,
+  rabatt: 5,
   marge: 15,
   expresszuschlag: 0,
-  bearbeitungsgebuehr: 0,
-  gesamtkosten: 0,
-  nettopreis: 0,
-  bruttosumme: 0
+  bearbeitungsgebuehr: 100,
+  gesamtkosten: 9000,
+  nettopreis: 8600,
+  bruttosumme: 10000
 };
 
 // Interface für den Context
@@ -101,7 +103,7 @@ const WizardContext = createContext<WizardContextType | undefined>(undefined);
 // Provider Komponente
 export function WizardProvider({ children }: { children: ReactNode }) {
   const [wizard, setWizard] = useState<WizardState>({
-    angebotsnummer: "ANG-2025-043", // In einer echten App würde dies dynamisch generiert
+    angebotsnummer: "ANG-2025-001", // In einer echten App würde dies dynamisch generiert
     grunddaten: defaultGrunddaten,
     route: defaultRoute,
     kalkulation: defaultKalkulation
@@ -143,7 +145,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   // Wizard zurücksetzen
   const resetWizard = () => {
     setWizard({
-      angebotsnummer: `ANG-2025-${Math.floor(Math.random() * 900) + 100}`,
+      angebotsnummer: `ANG-2025-00${Math.floor(Math.random() * 9) + 1}`,
       grunddaten: defaultGrunddaten,
       route: defaultRoute,
       kalkulation: defaultKalkulation

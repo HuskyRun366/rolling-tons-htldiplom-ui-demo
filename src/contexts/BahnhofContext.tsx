@@ -28,58 +28,82 @@ const BahnhofContext = createContext<BahnhofContextType | undefined>(undefined);
 const initialBahnhoefe: Bahnhof[] = [
   {
     id: '1',
-    name: 'Wien Hauptbahnhof',
-    bahnhofId: 'ATWI001',
-    land: 'Österreich',
-    region: 'Wien',
+    name: 'Bahnhof A',
+    bahnhofId: 'BHA001',
+    land: 'Land 1',
+    region: 'Region A',
     status: 'aktiv'
   },
   {
     id: '2',
-    name: 'München Hauptbahnhof',
-    bahnhofId: 'DEMH001',
-    land: 'Deutschland',
-    region: 'Bayern',
+    name: 'Bahnhof B',
+    bahnhofId: 'BHB001',
+    land: 'Land 1',
+    region: 'Region B',
     status: 'aktiv'
   },
   {
     id: '3',
-    name: 'Berlin Hauptbahnhof',
-    bahnhofId: 'DEBE001',
-    land: 'Deutschland',
-    region: 'Berlin',
+    name: 'Bahnhof C',
+    bahnhofId: 'BHC001',
+    land: 'Land 2',
+    region: 'Region C',
     status: 'aktiv'
   },
   {
     id: '4',
-    name: 'Zürich Hauptbahnhof',
-    bahnhofId: 'CHZH001',
-    land: 'Schweiz',
-    region: 'Zürich',
+    name: 'Bahnhof D',
+    bahnhofId: 'BHD001',
+    land: 'Land 2',
+    region: 'Region D',
     status: 'aktiv'
   },
   {
     id: '5',
-    name: 'Budapest Keleti',
-    bahnhofId: 'HUBK001',
-    land: 'Ungarn',
-    region: 'Budapest',
+    name: 'Bahnhof E',
+    bahnhofId: 'BHE001',
+    land: 'Land 3',
+    region: 'Region E',
     status: 'aktiv'
   },
   {
     id: '6',
-    name: 'Salzburg Hauptbahnhof',
-    bahnhofId: 'ATSZ001',
-    land: 'Österreich',
-    region: 'Salzburg',
+    name: 'Bahnhof F',
+    bahnhofId: 'BHF001',
+    land: 'Land 3',
+    region: 'Region F',
     status: 'aktiv'
   },
   {
     id: '7',
-    name: 'Hamburg Hauptbahnhof',
-    bahnhofId: 'DEHH001',
-    land: 'Deutschland',
-    region: 'Hamburg',
+    name: 'Bahnhof G',
+    bahnhofId: 'BHG001',
+    land: 'Land 4',
+    region: 'Region G',
+    status: 'aktiv'
+  },
+  {
+    id: '8',
+    name: 'Bahnhof H',
+    bahnhofId: 'BHH001',
+    land: 'Land 4',
+    region: 'Region H',
+    status: 'aktiv'
+  },
+  {
+    id: '9',
+    name: 'Bahnhof I',
+    bahnhofId: 'BHI001',
+    land: 'Land 5',
+    region: 'Region I',
+    status: 'aktiv'
+  },
+  {
+    id: '10',
+    name: 'Bahnhof J',
+    bahnhofId: 'BHJ001',
+    land: 'Land 5',
+    region: 'Region J',
     status: 'aktiv'
   }
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import { AngebotProvider } from "@/contexts/AngebotContext";
 import { KundenProvider } from "@/contexts/KundenContext";
@@ -17,6 +17,14 @@ interface ClientLayoutWrapperProps {
 }
 
 export default function ClientLayoutWrapper({ children }: ClientLayoutWrapperProps) {
+  // Force clear localStorage on component mount to ensure test data is used
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('Clearing localStorage to use test data');
+      localStorage.clear();
+    }
+  }, []);
+
   return (
     <FluentProvider theme={webLightTheme}>
       <AngebotProvider>
